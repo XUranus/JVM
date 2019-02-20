@@ -2,13 +2,14 @@
 #include <fstream>
 #include <iomanip>
 
-
+/*
 #include "../test/classFileTest/Test1.cpp"
 #include "../test/runtimeTest/Test2.cpp"
 #include "../test/runtimeTest/Test3.cpp"
 #include "../test/utilTest/Test4.cpp"
 #include "../test/classPathTest/Test5.cpp"
 #include "../test/testClassLoader/Test6.cpp"
+*/
 
 #include "util/ShellCommand.h"
 #include "runtime/heap/StringPool.h"
