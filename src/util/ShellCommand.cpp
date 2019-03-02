@@ -26,6 +26,8 @@ ShellCommand::ShellCommand(int argc, char **argv) //construct by command line ar
 {
     helpFlag = false;
     versionFlag = false;
+    verboseClass = false;
+    verboseInst = false;
     cpOption = "";
     className = "";
     XjreOption = "";
@@ -86,8 +88,13 @@ void ShellCommand::printHelp()
 
 void ShellCommand::startJVM()
 {
+    if(className.empty())
+    {
+        printHelp();
+        exit(0);
+    }
     ClassPath classPath(XjreOption,cpOption);
-    ClassLoader classLoader(&classPath);
+    ClassLoader classLoader(&classPath,verboseClass);
 
     //get class name
     className = className.substr(className.rfind('/')+1,className.length());

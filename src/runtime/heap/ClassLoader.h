@@ -12,8 +12,9 @@
 struct ClassLoader {
     std::map<std::string,Class*> classMap;
     ClassPath* classPath;
+    bool verboseClass;
 
-    explicit ClassLoader(ClassPath* cp);
+    explicit ClassLoader(ClassPath* cp,bool verboseClass);
     Class* loadClass(std::string className);
     Class* loadNonArrayClass(std::string className);
     Class* loadArrayClass(std::string className);

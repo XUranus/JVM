@@ -206,7 +206,7 @@ void Method::debug()
 }
 
 
-void loop(Thread* thread)
+void loop(Thread* thread,bool verboseInst)
 {
     BytesReader reader;
     int i = 0;
@@ -221,6 +221,8 @@ void loop(Thread* thread)
 
         auto inst = Instruction::createInstruction(opCode);
         inst->fetchOperands(reader);
+        if(verboseInst)
+            Console::printlnYellow("[INST]:"+inst->toString());
 
         //printf("[%d] <%s> starkSize=%d \n",i++,inst->toString().c_str(),frame->thread->stack.size);
         //StringPool::getStringPool()->debug();
@@ -235,16 +237,17 @@ void loop(Thread* thread)
     }
 }
 
-void Method::interpret(Method *method,bool logTag,std::vector<std::string> args)
+void Method::interpret(Method *method,bool verboseInst,std::vector<std::string> args)
 {
     auto thread = new Thread(2048);
     auto frame = new Frame(method);
     thread->pushFrame(frame);
 
+    //set command args
     auto jArgs = method->_class->classloader->createArgsArrayObject(args);
     frame->localVars.setRef(0,jArgs);
 
-    loop(thread);
+    loop(thread,verboseInst);
     delete(frame);
     delete(thread);
 }

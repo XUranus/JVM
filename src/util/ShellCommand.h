@@ -12,8 +12,8 @@ struct ShellCommand {
     std::vector<std::string> args;
     bool helpFlag; //-help
     bool versionFlag; //-version
-    bool verboseClass;//-verbose:class//TODO::
-    bool verboseInst;//-verbose:inst //TODO::
+    bool verboseClass;//-verbose:class
+    bool verboseInst;//-verbose:inst
     std::string cpOption; //-cp
     std::string XjreOption;// -X
     std::string className; // last argv

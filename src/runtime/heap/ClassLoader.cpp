@@ -8,8 +8,9 @@
 #include "Object.h"
 #include "StringPool.h"
 
-ClassLoader::ClassLoader(ClassPath *cp)
+ClassLoader::ClassLoader(ClassPath *cp, bool _verboseClass)
 {
+    verboseClass = _verboseClass;
     classPath = cp;
     classMap.clear();
 }
@@ -19,7 +20,8 @@ Class* ClassLoader::loadClass(std::string className)
     if(classMap[className]!= nullptr)
         return classMap[className];
     else {
-        Console::printlnInfo("loading:" + className);
+        if(verboseClass)
+            Console::printlnBlue("[ClassLoader]: loading:" + className);
         if (className[0] == '[')
             return loadArrayClass(className);
         else
@@ -33,7 +35,8 @@ Class* ClassLoader::loadNonArrayClass(std::string className)
     auto ret = readClass(className);
     auto _class = defineClass(ret.first,ret.second);
     link(_class);
-    Console::printlnInfo("class loaded: "+className+" "+std::to_string((long)_class));
+    if(verboseClass)
+        Console::printlnBlue("[ClassLoader]: loaded: "+className+" addr:"+std::to_string((long)_class));
     return _class;
 }
 
@@ -45,7 +48,8 @@ Class* ClassLoader::loadArrayClass(std::string className)
     resolveSuperClass(_class);
     resolveInterfaces(_class);
     classMap[className] = _class;
-    Console::printlnInfo("class loaded: "+className);
+    if(verboseClass)
+        Console::printlnBlue("[ClassLoader]: loaded: "+className+" addr:"+std::to_string((long)_class));
     return _class;
 }
 

@@ -24,7 +24,7 @@ int main(int args,char* argv[]) {
     //Test3::excute();
     //Test4::excute();
     //Test5::excute();
-    // Test6::excute();
+    //Test6::excute();
 
     ShellCommand cmd(args,argv);
     cmd.excute();
