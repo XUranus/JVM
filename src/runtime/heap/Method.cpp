@@ -8,6 +8,7 @@
 #include "../../util/Console.h"
 #include "ClassLoader.h"
 #include "StringPool.h"
+#include "ObjectPool.h"
 
 void MethodDescriptor::addParameterType(std::string type)
 {
@@ -221,8 +222,11 @@ void loop(Thread* thread,bool verboseInst)
 
         auto inst = Instruction::createInstruction(opCode);
         inst->fetchOperands(reader);
+
         if(verboseInst)
             Console::printlnYellow("[INST]:"+inst->toString());
+        //frame->debug();
+        //ObjectPool::getObjectPool()->debug();
 
         //printf("[%d] <%s> starkSize=%d \n",i++,inst->toString().c_str(),frame->thread->stack.size);
         //StringPool::getStringPool()->debug();

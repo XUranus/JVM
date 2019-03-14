@@ -317,7 +317,7 @@ std::string Instruction::opCodeToName(u1 _opCode) {
         case 0xA4: return "if_icmple";
         case 0xA5: return "if_acmpeq";
         case 0xA6: return "if_acmpne";
-        case 0xA7: return "goto_";
+        case 0xA7: return "goto";
         case 0xA8: return "jsr";
         case 0xA9: return "ret";
         case 0xAA: return "tableswitch";
@@ -327,7 +327,7 @@ std::string Instruction::opCodeToName(u1 _opCode) {
         case 0xAE: return "freturn";
         case 0xAF: return "dreturn";
         case 0xB0: return "areturn";
-        case 0xB1: return "return_";
+        case 0xB1: return "return";
         case 0xB2: return "getstatic";
         case 0xB3: return "putstatic";
         case 0xB4: return "getfield";
@@ -336,7 +336,7 @@ std::string Instruction::opCodeToName(u1 _opCode) {
         case 0xB7: return "invokespecial";
         case 0xB8: return "invokestatic";
         case 0xB9: return "invokeinterface";
-        case 0xBB: return "new_";
+        case 0xBB: return "new";
         case 0xBC: return "newarray";
         case 0xBD: return "anewarray";
         case 0xBE: return "arraylength";

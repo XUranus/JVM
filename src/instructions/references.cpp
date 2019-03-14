@@ -372,6 +372,7 @@ void invokespecial::excute(Frame *frame) {
 		Console::printlnError("java.lang.InCompatibleClassChangeError");
 		exit(1);
 	}
+
 	auto ref = frame->operandStack.getRefFromTop(resolvedMethod->argSlotCount);
 	if(ref== nullptr)
 	{

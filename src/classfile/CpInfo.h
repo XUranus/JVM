@@ -139,8 +139,7 @@ struct CONSTANT_MethodHandle:public CpInfo {
 };
 
 struct CONSTANT_MethodType:public CpInfo {
-    u2 classIndex;
-    u2 classAndTypeIndex;
+    u2 descriptorIndex;
     CONSTANT_MethodType(u1 tag,ClassReader& reader,CpInfo** constantPool);
 };
 

@@ -57,6 +57,49 @@ void MemberInfo::debug()
 }
 
 
+void FieldInfo::debug()
+{
+    //TODO:implment it
+    printf("[Debug FieldInfo]\n");
+    printf("name: %s\n",getName().c_str(),getDescriptorName().c_str());
+    printf("descriptor: %s\n",getDescriptorName().c_str());
+    printf("accessFlags: ");
+    for(const auto &af:getAccessFlagsNames())
+    {
+        printf("%s,",af.c_str());
+    }
+    printf("\nattributeCount:%d\n",attributesCount);
+    for(auto i=0;i<attributesCount;i++) printf("attributeNameIndex: %u\n",attributes[i]->attributeNameAndIndex);
+
+    printf("\n");
+
+    for(u2 i=0;i<attributesCount;i++)
+        attributes[i]->debug();
+    printf("\n");
+}
+
+void MethodInfo::debug()
+{
+    //TODO:implment it
+    printf("[Debug MethodInfo]\n");
+    printf("name: %s\n",getName().c_str(),getDescriptorName().c_str());
+    printf("descriptor: %s\n",getDescriptorName().c_str());
+    printf("accessFlags: ");
+    for(const auto &af:getAccessFlagsNames())
+    {
+        printf("%s,",af.c_str());
+    }
+    printf("\nattributeCount:%d\n",attributesCount);
+    for(auto i=0;i<attributesCount;i++) printf("attributeNameIndex: %u\n",attributes[i]->attributeNameAndIndex);
+
+    printf("\n");
+
+    for(u2 i=0;i<attributesCount;i++)
+        attributes[i]->debug();
+    printf("\n");
+}
+
+
 Attribute_Code* MemberInfo::getCodeAttribute() {
     for (int i=0;i<attributesCount;i++)
     {

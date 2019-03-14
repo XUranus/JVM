@@ -26,7 +26,7 @@ CpInfo* CpInfo::getConstantInfoByTag(u1 tag,ClassReader& reader,CpInfo** constan
         case CONSTANT_MethodType_tag:return new CONSTANT_MethodType(tag,reader,constantPool);
         case CONSTANT_InvokeDynamic_tag:return new CONSTANT_InvokeDynamic(tag,reader,constantPool);
         default: {
-            perror("unknown constant tag");
+            printf("unknown constant tag:%d\n",tag);
             exit(1);
         }
     }
@@ -187,8 +187,7 @@ CONSTANT_MethodHandle::CONSTANT_MethodHandle(u1 tag, ClassReader &reader,CpInfo*
 
 CONSTANT_MethodType::CONSTANT_MethodType(u1 tag, ClassReader &reader,CpInfo** constantPool):CpInfo(tag,constantPool)
 {
-    classIndex = reader.readU2();
-    classAndTypeIndex = reader.readU2();
+    descriptorIndex = reader.readU2();
 }
 
 CONSTANT_InvokeDynamic::CONSTANT_InvokeDynamic(u1 tag, ClassReader &reader,CpInfo** constantPool):CpInfo(tag,constantPool)

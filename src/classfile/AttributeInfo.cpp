@@ -101,7 +101,6 @@ Attribute_Code::Attribute_Code(u2 _attributeNameAndIndex, u4 _attributeLength, C
     attributesCount = reader.readU2();
     for(u2 i=0;i<attributesCount;i++)
         attributes.emplace_back(reader.readAttributeInfo(_constantPool));
-
 }
 
 Attribute_Code::ExceptionTableEntry::ExceptionTableEntry(ClassReader &reader) {
@@ -169,6 +168,7 @@ Attribute_LocalVariableTable::LocalVariableTableEntry::LocalVariableTableEntry()
 Attribute_InnerClasses::Attribute_InnerClasses(u2 _attributeNameAndIndex, u4 _attributeLength, CpInfo **_constantPool,ClassReader &reader):AttributeInfo(_attributeNameAndIndex,_attributeLength,_constantPool)
 {
     numberOfClasses = reader.readU2();
+    //printf("num = %d",numberOfClasses);
     for(auto i=0;i<numberOfClasses;i++)
         classes.emplace_back(ClassEntry(reader));
 }
@@ -180,6 +180,7 @@ Attribute_InnerClasses::ClassEntry::ClassEntry(ClassReader &reader)
     outerClassInfoIndex = reader.readU2();
     innerNameIndex = reader.readU2();
     innerClassAccessFlags = reader.readU2();
+   // printf("%d %d %d %d",innerNameIndex,outerClassInfoIndex,innerNameIndex,innerClassAccessFlags);
 }
 
 Attribute_Synthetic::Attribute_Synthetic(u2 _attributeNameAndIndex, u4 _attributeLength, CpInfo **_constantPool,ClassReader &reader):AttributeInfo(_attributeNameAndIndex,_attributeLength,_constantPool)
@@ -250,8 +251,9 @@ Attribute_StackMapTable::Attribute_StackMapTable(u2 _attributeNameAndIndex, u4 _
 {
     numbersOfEntries = reader.readU2();
     entries = new StackMapFrame[numbersOfEntries];
-    for(auto i=0;i<numbersOfEntries;i++)
+    for(auto i=0;i<numbersOfEntries;i++) {
         entries[i] = StackMapFrame(reader);
+    }
 }
 
 Attribute_StackMapTable::StackMapFrame::StackMapFrame(ClassReader &reader) {
@@ -284,6 +286,7 @@ Attribute_StackMapTable::StackMapFrame::StackMapFrame(ClassReader &reader) {
         full_frame.locals = new Verification_type_info[full_frame.number_of_locals];
         for(auto i=0;i<full_frame.number_of_locals;i++)
             full_frame.locals[i] = Verification_type_info(reader);
+        full_frame.number_of_stack_items = reader.readU2();
         full_frame.stack = new Verification_type_info[full_frame.number_of_stack_items];
         for(auto i=0;i<full_frame.number_of_stack_items;i++)
             full_frame.stack[i] = Verification_type_info(reader);
@@ -329,7 +332,7 @@ Attribute_BootstrapMethods::BootStrapMethodEntry::BootStrapMethodEntry(ClassRead
     bootstrapMethodRef = reader.readU2();
     numBootstrapArguments = reader.readU2();
     bootstrapArguments.resize(numBootstrapArguments);
-    for(auto i=0;i<bootstrapArguments[i];i++)
+    for(auto i=0;i<numBootstrapArguments;i++)
         bootstrapArguments[i] = reader.readU2();
 }
 

@@ -202,6 +202,7 @@ ClassFile* ClassReader::parseClassFile()
     {
         classfile->constantPool[i] = nullptr;
     }
+
     for(u2 i=1;i<classfile->constantPoolCount;i++)
     {
         u1 tag = readU1();
@@ -242,7 +243,6 @@ ClassFile* ClassReader::parseClassFile()
     {
         classfile->attributes[i] = readAttributeInfo(classfile->constantPool);
     }
-
 
     return classfile;
 }

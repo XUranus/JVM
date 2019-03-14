@@ -10,8 +10,12 @@ struct Object;
 struct Slot { //TODO::try union later
     int num;
     Object* ref;
+    enum Type {
+        NUM,REF,UNINITIALIZED,SLOT
+    } type;
 
     Slot();
+    bool isRef();
 };
 
 struct Slots {

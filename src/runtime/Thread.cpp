@@ -40,10 +40,11 @@ void Thread::debug()
 
 void Thread::initClass(Class *_class)
 {
-    Console::printlnWarning("initClass() "+_class->name);
+    Console::printlnWarning("initClass() "+_class->name+" start");
     _class->initStarted = true;
     scheduleClinit(_class);
     initSuperClass(_class);
+    Console::printlnWarning("initClass() "+_class->name+" finish");
 }
 
 
@@ -54,6 +55,10 @@ void Thread::scheduleClinit(Class *_class)
     if(clinit != nullptr)
     {
         pushFrame(new Frame(clinit));
+    } else {
+        for(auto m:_class->methods) {
+            Console::printlnError("scheduleClinit() cannot find <clinit> method in class:"+_class->name);
+        }
     }
 }
 

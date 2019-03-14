@@ -8,7 +8,14 @@
 Slot::Slot() {
     num = 0;
     ref = nullptr;
+    type = UNINITIALIZED;
 }
+
+bool Slot::isRef() {
+    return type==REF;
+}
+
+/*------------------------------------------------------------------------*/
 
 Slots::Slots(int _capacity)
 {
@@ -23,6 +30,7 @@ Slots::~Slots()
 
 void Slots::setInt(unsigned int index, int val)
 {
+    data[index].type = Slot::Type::NUM;
     data[index].num = val;
 }
 
@@ -33,6 +41,7 @@ int Slots::getInt(unsigned int index)
 
 void Slots::setLong(unsigned int index, long val)
 {
+    data[index].type = Slot::Type::NUM;
     data[index].num = (int)(val);
     data[index+1].num = (int)(val >> 32);
 }
@@ -46,6 +55,7 @@ long Slots::getLong(unsigned int index)
 
 void Slots::setFloat(unsigned int index, float val)
 {
+    data[index].type = Slot::Type::NUM;
     data[index].num = *(int*)(&val);
 }
 
@@ -56,6 +66,7 @@ float Slots::getFloat(unsigned int index)
 
 void Slots::setDouble(unsigned int index, double val)
 {
+    data[index].type = Slot::Type::NUM;
     setLong(index,*(long*)(&val));
 }
 
@@ -67,6 +78,7 @@ double Slots::getDouble(unsigned int index)
 
 void Slots::setRef(unsigned int index, Object *ref)
 {
+    data[index].type = Slot::Type::REF;
     data[index].ref = ref;
 }
 
@@ -82,6 +94,7 @@ Slot Slots::getSlot(unsigned int index)
 
 void Slots::setSlot(unsigned int index, Slot slot)
 {
+    data[index].type = Slot::Type::SLOT;
     data[index] = slot;
 }
 

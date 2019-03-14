@@ -36,7 +36,7 @@ Class* ClassLoader::loadNonArrayClass(std::string className)
     auto _class = defineClass(ret.first,ret.second);
     link(_class);
     if(verboseClass)
-        Console::printlnBlue("[ClassLoader]: loaded: "+className+" addr:"+std::to_string((long)_class));
+        Console::printlnBlue("[ClassLoader]: loaded: "+className);//+" addr:"+std::to_string((long)_class));
     return _class;
 }
 
@@ -49,7 +49,7 @@ Class* ClassLoader::loadArrayClass(std::string className)
     resolveInterfaces(_class);
     classMap[className] = _class;
     if(verboseClass)
-        Console::printlnBlue("[ClassLoader]: loaded: "+className+" addr:"+std::to_string((long)_class));
+        Console::printlnBlue("[ClassLoader]: loaded: "+className);//+" addr:"+std::to_string((long)_class));
     return _class;
 }
 

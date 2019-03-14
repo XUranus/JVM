@@ -7,6 +7,7 @@
 #include "../../util/Console.h"
 #include "ClassLoader.h"
 #include "StringPool.h"
+#include "ObjectPool.h"
 
 Class::Class(ClassFile *classFile) {
     //basic initialize from class file
@@ -28,7 +29,7 @@ Class::Class(ClassFile *classFile) {
     interfaces.clear();//init later in define() -> resolveInterfaces();
     classloader = nullptr;//init later in defineClass()
 
-    initStarted = true;//TODO::???!!
+    initStarted = false;//TODO::???!!
 }
 
 
@@ -231,7 +232,9 @@ Method* Class::lookUpInterfaceMethod(std::string _name, std::string descriptor)
 
 Object* Class::newObject()
 {
-    return new Object(this);
+    auto obj = new Object(this);
+    ObjectPool::getObjectPool()->add(obj);
+    return obj;
 }
 
 Object* Class::newArrayObject(unsigned int count)
@@ -241,7 +244,9 @@ Object* Class::newArrayObject(unsigned int count)
         Console::printlnError("initialize failed, not array:"+name);
         exit(1);
     }
-    return new Object(this,count);
+    auto obj = new Object(this,count);
+    ObjectPool::getObjectPool()->add(obj);
+    return obj;
 }
 
 Object* Class::newMultiDimensionArray(std::vector<int32>& counts)

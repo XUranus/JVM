@@ -37,12 +37,14 @@ struct MemberInfo {
 struct MethodInfo: public MemberInfo {
     MethodInfo();
     std::vector<std::string> getAccessFlagsNames() override;
+    void debug();
 };
 
 
 struct FieldInfo: public MemberInfo {
     FieldInfo();
     std::vector<std::string> getAccessFlagsNames() override;
+    void debug();
 };
 
 #endif //JVM_MEMBERINFO_H
