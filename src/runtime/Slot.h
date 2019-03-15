@@ -16,6 +16,7 @@ struct Slot { //TODO::try union later
 
     Slot();
     bool isRef();
+    void clear();
 };
 
 struct Slots {

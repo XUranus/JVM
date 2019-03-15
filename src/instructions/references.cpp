@@ -26,9 +26,10 @@ void InvokeMethodLogic::invokeMethod(Frame *invokerFrame, Method *method) {
 	//TODO::hack!
 	if(method->accessFlags & ACC_NATIVE_FLAG)
 	{
-		if(method->name=="registerNatives")
-			thread->popFrame();
-		else {
+		if(method->name=="registerNatives") {
+            thread->popFrame();
+            //Console::printlnRed("registerNatives");
+        } else {
 			Console::printlnWarning("Native Method:"+method->_class->name+"."+method->name+method->descriptor);thread->debug();
 			thread->popFrame();
 			Console::printlnWarning("after pop:"+std::to_string(thread->stack.size));
@@ -373,6 +374,7 @@ void invokespecial::excute(Frame *frame) {
 		exit(1);
 	}
 
+	//resolvedMethod->debug();
 	auto ref = frame->operandStack.getRefFromTop(resolvedMethod->argSlotCount);
 	if(ref== nullptr)
 	{

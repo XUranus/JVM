@@ -33,5 +33,9 @@ void ObjectPool::deleteObject(Object *obj) {
 }
 
 void ObjectPool::debug() {
-    printf("[Debug ObjectPool] ObjNum=%lu\n",objectNum());
+    printf("[Debug ObjectPool] (num=%lu) <",objectNum());
+    for(auto &obj:objs) {
+        printf("%s ",obj->_class->name.c_str());
+    }
+    printf("\n");
 }

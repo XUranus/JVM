@@ -1,11 +1,11 @@
 # JVM
-this is a toy Java Virtual Machine implemented by C++ 
+this is a toy Java Virtual Machine implemented by C++ ,support java8 or higher
 
 (only support two native methods: `System.out.print()` and `System.out.println()` ,and not support `invokedynamic` yet)
 
 ## Build
 Require
- - linux
+ - linux/macOS
  - C++11
  - libzip
 
@@ -43,6 +43,7 @@ options:
  - `-cp` :specify classpath
  - `-verbose:class` :show class loading process
  - `-verbose:inst` :show instruction excuting 
+ - `-classpy` :show classpy info,like `javap -verbose [classname]`
 
 ## TODO
  - implement native

@@ -23,6 +23,7 @@ LocalVars::~LocalVars()
 
 void LocalVars::setInt(unsigned int index, int val)
 {
+    data[index].type = Slot::Type::NUM;
     data[index].num = val;
 }
 
@@ -33,6 +34,8 @@ int LocalVars::getInt(unsigned int index)
 
 void LocalVars::setLong(unsigned int index, long val)
 {
+    data[index].type = Slot::Type::NUM;
+    data[index+1].type = Slot::Type::NUM;
     data[index].num = (int)(val);
     data[index+1].num = (int)(val >> 32);
 }
@@ -46,6 +49,7 @@ long LocalVars::getLong(unsigned int index)
 
 void LocalVars::setFloat(unsigned int index, float val)
 {
+    data[index].type = Slot::Type::NUM;
     data[index].num = *(int*)(&val);
 }
 
@@ -67,6 +71,7 @@ double LocalVars::getDouble(unsigned int index)
 
 void LocalVars::setRef(unsigned int index, Object *ref)
 {
+    data[index].type = Slot::Type::REF;
     data[index].ref = ref;
 }
 
@@ -82,6 +87,7 @@ Slot LocalVars::getSlot(unsigned int index)
 
 void LocalVars::setSlot(unsigned int index, Slot slot)
 {
+    data[index].type = slot.type;
     data[index] = slot;
 }
 
@@ -89,7 +95,14 @@ void LocalVars::debug()
 {
     printf("[Debug LocalVars] ");
     for(auto i=0;i<capacity;i++) {
-        printf("[%d]{%d,%ld} ",i,data[i].num,(long)data[i].ref);
+        if(data[i].type==Slot::Type::REF)
+            printf("(%d)[0x%lx] ",i,(unsigned long)data[i].ref);
+        if(data[i].type==Slot::Type::NUM)
+            printf("(%d)[%d] ",i,data[i].num);
+        if(data[i].type==Slot::Type::UNINITIALIZED)
+            printf("(%d)[] ",i);
+        if(data[i].type==Slot::Type::SLOT)
+            printf("(%d)[SLOT] ",i);
     }
     printf("\n");
 }
@@ -109,6 +122,7 @@ OperandStack::~OperandStack() {
 
 void OperandStack::pushInt(int v)
 {
+    data[size].type = Slot::Type::NUM;
     data[size].num = v;
     size++;
 }
@@ -116,11 +130,15 @@ void OperandStack::pushInt(int v)
 int OperandStack::popInt()
 {
     size--;
-    return data[size].num;
+    int ret = data[size].num;
+    data[size].clear();
+    return ret;
 }
 
 void OperandStack::pushLong(long v)
 {
+    data[size].type = Slot::Type::NUM;
+    data[size+1].type = Slot::Type::NUM;
     data[size].num = (int)(v);
     data[size+1].num = (int)(v >> 32);
     size += 2;
@@ -131,11 +149,15 @@ long OperandStack::popLong()
     size -= 2;
     auto low = (unsigned int)data[size].num;
     auto high = (unsigned int)data[size+1].num;
-    return (long)high << 32 | (long)low;
+    long ret = (long)high << 32 | (long)low;
+    data[size].clear();
+    data[size+1].clear();
+    return ret;
 }
 
 void OperandStack::pushFloat(float v)
 {
+    data[size].type = Slot::Type::NUM;
     data[size].num = *(int*)(&v);
     size++;
 }
@@ -143,7 +165,9 @@ void OperandStack::pushFloat(float v)
 float OperandStack::popFloat()
 {
     size--;
-    return *(float*)(&data[size].num);
+    float ret = *(float*)(&data[size].num);
+    data[size].clear();
+    return ret;
 }
 
 void OperandStack::pushDouble(double v)
@@ -159,6 +183,7 @@ double OperandStack::popDouble()
 
 void OperandStack::pushRef(Object *ref)
 {
+    data[size].type = Slot::Type::REF;
     data[size].ref = ref;
     size++;
 }
@@ -166,11 +191,14 @@ void OperandStack::pushRef(Object *ref)
 Object* OperandStack::popRef()
 {
     size--;
-    return data[size].ref;
+    Object* ret = data[size].ref;
+    data[size].clear();
+    return ret;
 }
 
 void OperandStack::pushSlot(Slot s)
 {
+    data[size].type = s.type;
     data[size] = s;
     size++;
 }
@@ -178,13 +206,20 @@ void OperandStack::pushSlot(Slot s)
 Slot OperandStack::popSlot()
 {
     size--;
-    return data[size];
+    Slot ret = data[size];
+    data[size].clear();
+    return ret;
 }
 
 Object* OperandStack::getRefFromTop(unsigned int n)
 {
     //Console::printlnWarning("getRefFromTop() "+std::to_string(n) + " "+std::to_string(capacity));
-    return data[size-n-1].ref;
+    int index = size-n-1;
+    if(index<0) {
+        Console::printlnError("getRefFromTop() index negative error");
+        return nullptr;
+    }
+    return data[index].ref;
 }
 
 std::vector<int32> OperandStack::popAndCheckCounts(unsigned int dimensions)
@@ -205,7 +240,14 @@ std::vector<int32> OperandStack::popAndCheckCounts(unsigned int dimensions)
 void OperandStack::debug() {
     printf("[Debug OperandStack](size=%d) ",size);
     for(auto i=0;i<capacity;i++) {
-        printf("[%d]{%d,%ld} ",i,data[i].num,(long)data[i].ref);
+        if(data[i].type==Slot::Type::REF)
+            printf("(%d)[0x%lx] ",i,(unsigned long)data[i].ref);
+        if(data[i].type==Slot::Type::NUM)
+            printf("(%d)[%d] ",i,data[i].num);
+        if(data[i].type==Slot::Type::UNINITIALIZED)
+            printf("(%d)[] ",i);
+        if(data[i].type==Slot::Type::SLOT)
+            printf("(%d)[SLOT] ",i);
     }
     printf("\n");
 }

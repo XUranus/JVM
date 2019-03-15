@@ -15,6 +15,12 @@ bool Slot::isRef() {
     return type==REF;
 }
 
+void Slot::clear() {
+    num = 0;
+    ref = nullptr;
+    type = UNINITIALIZED;
+}
+
 /*------------------------------------------------------------------------*/
 
 Slots::Slots(int _capacity)

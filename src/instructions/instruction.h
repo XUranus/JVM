@@ -15,16 +15,18 @@
 
 struct BytesReader {
     int pc;
+    unsigned int length;
     byte * code;//byte code[]
 
     BytesReader();
-    BytesReader(byte* _code);
-    void reset(byte* _code,int _pc);
+    BytesReader(byte* _code, unsigned int _length);
+    void reset(byte* _code,int _pc, unsigned int _length);
     uint8 readUint8();
     int8 readInt8();
     uint16 readUint16();
     int16 readInt16();
     int32 readInt32();
+    bool hasByte();
 
     int32* readInt32s(int jumpOffsetsCount);
     void skipPadding();
@@ -35,6 +37,7 @@ struct Instruction {
     u1 opCode;
     //static void interpretAndExcute(uint8 opCode,Frame* frame,BytesReader& reader);
 
+    static std::vector<std::string> byteCodesNames(std::vector<u1>& vec);
     static Instruction* createInstruction(u1 _opCode);
     static std::string opCodeToName(u1 _opCode);
     std::string getInstructionName();

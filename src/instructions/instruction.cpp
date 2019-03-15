@@ -24,18 +24,19 @@ BytesReader::BytesReader()
 {
     pc = 0;
     code = nullptr;
+    length = 0;
 }
 
-BytesReader::BytesReader(byte *_code)
-{
+BytesReader::BytesReader(byte *_code, unsigned int _length) {
     pc = 0;
     code = _code;
+    length = _length;
 }
 
-void BytesReader::reset(byte*_code,int _pc)
-{
+void BytesReader::reset(byte *_code, int _pc, unsigned int _length) {
     pc = _pc;
     code = _code;
+    length = _length;
 }
 
 int8 BytesReader::readInt8()
@@ -89,8 +90,23 @@ int32* BytesReader::readInt32s(int jumpOffsetsCount)
     return jumpOffsets;
 }
 
+bool BytesReader::hasByte() {
+    return length>=pc;
+}
+
 
 /***************************************************   Instructions   ***************************************************/
+std::vector<std::string> Instruction::byteCodesNames(std::vector<u1> &codes) {
+    BytesReader reader(codes.data(),codes.size());
+    std::vector<std::string> ans;
+    while (reader.hasByte()) {
+        auto opCode = reader.readUint8();
+        auto inst = Instruction::createInstruction(opCode);
+        inst->fetchOperands(reader);
+        ans.push_back(inst->toString());
+    }
+    return ans;
+}
 
 void Instruction::fetchOperands(BytesReader &reader) {
     printf("not implement method fetchOperands(),op name:%s\n");

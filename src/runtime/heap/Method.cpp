@@ -193,16 +193,19 @@ std::vector<Method*> Method::parseMethods(ClassFile *classFile, Class *classRef)
 void Method::debug()
 {
     printf("[Debug Method]\n");
+    printf("Class:%s ",_class->name.c_str());
+    printf("name:%s ",name.c_str());
+    printf("descriptor:%s ",descriptor.c_str());
     printf("accessFlags:%d\n",accessFlags);
-    printf("name:%s\n",name.c_str());
-    printf("descriptor:%s\n",descriptor.c_str());
-    printf("Class:%s\n",_class->name.c_str());
-    printf("maxLocals:%u\n",maxLocals);
-    printf("maxStacks:%u\n",maxStack);
+
+    printf("maxLocals:%u ",maxLocals);
+    printf("maxStacks:%u ",maxStack);
     printf("argSlotsCount:%d\n",argSlotCount);
     printf("Code:");
-    for(auto c:code)
-        printf("%02x ",c);
+
+    auto codes = Instruction::byteCodesNames(code);
+    for(auto& c:codes)
+        printf("[%s] ",c.c_str());
     printf("\n");
 }
 
@@ -211,13 +214,13 @@ void loop(Thread* thread,bool verboseInst)
 {
     BytesReader reader;
     int i = 0;
-    while (true)
+    while (reader.hasByte())
     {
         auto frame = thread->currentFrame();
         int pc = frame->nextPc;
         thread->pc = pc;
 
-        reader.reset(frame->method->code.data(),pc);
+        reader.reset(frame->method->code.data(),pc,frame->method->code.size());
         auto opCode = reader.readUint8();
 
         auto inst = Instruction::createInstruction(opCode);

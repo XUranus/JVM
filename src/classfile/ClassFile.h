@@ -43,6 +43,7 @@ struct ClassFile {
     std::vector<std::string> getInterfacesNames();
     MethodInfo* getMainMethod();
     std::string getSourceFileName();
+    void verbose();//javap verbose tool
 
 
 };

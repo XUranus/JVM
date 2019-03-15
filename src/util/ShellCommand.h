@@ -14,6 +14,7 @@ struct ShellCommand {
     bool versionFlag; //-version
     bool verboseClass;//-verbose:class
     bool verboseInst;//-verbose:inst
+    bool classpyFlag;//-classpy
     std::string cpOption; //-cp
     std::string XjreOption;// -X
     std::string className; // last argv
@@ -23,6 +24,7 @@ struct ShellCommand {
     void excute();
     void printVersion();
     void printHelp();
+    void classpy();
     void startJVM();
 };
 

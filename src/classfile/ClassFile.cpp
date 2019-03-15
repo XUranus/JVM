@@ -138,3 +138,7 @@ std::string ClassFile::getSourceFileName()
     printf("read SourceFile name Error.\n");
     exit(1);
 }
+
+void ClassFile::verbose() {
+    debug();//fix latter
+}

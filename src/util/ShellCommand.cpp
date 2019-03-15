@@ -10,6 +10,7 @@
 #include "../../src/runtime/heap/ClassLoader.h"
 #include "../../src/instructions/instruction.h"
 #include "Console.h"
+#include "FilePath.h"
 
 void ShellCommand::debug()
 {
@@ -28,6 +29,7 @@ ShellCommand::ShellCommand(int argc, char **argv) //construct by command line ar
     versionFlag = false;
     verboseClass = false;
     verboseInst = false;
+    classpyFlag = false;
     cpOption = "";
     className = "";
     XjreOption = "";
@@ -48,6 +50,8 @@ ShellCommand::ShellCommand(int argc, char **argv) //construct by command line ar
             verboseInst = true;
         } else if(std::string(argv[i])=="-verbose") {
             verboseClass = verboseInst = true;
+        } else if(std::string(argv[i])=="-classpy") {
+            classpyFlag = true;
         } else if(std::string(argv[i])=="-cp" && i+1<argc) {
             cpOption = std::string(argv[i+1]);
             i++;
@@ -67,6 +71,8 @@ void ShellCommand::excute()
         printVersion();
     else if(helpFlag)
         printHelp();
+    else if(classpyFlag)
+        classpy();
     else
         startJVM();
 }
@@ -84,6 +90,19 @@ void ShellCommand::printHelp()
     printf("where options include:\n\n");
     printf("\t-cp <class search path of directories and zip/jar files>\n");
     printf("\t-verbose <class need to be shown detail>\n\n");
+}
+
+void ShellCommand::classpy() {
+    if(className.empty())
+    {
+        printHelp();
+        exit(0);
+    }
+
+    ClassPath classPath(XjreOption,cpOption);
+    auto ret = classPath.readClass(className);
+    ClassReader reader(ret.first,ret.second);
+    reader.parseClassFile()->verbose();
 }
 
 void ShellCommand::startJVM()
