@@ -16,8 +16,9 @@ struct StringPool {
     StringPool();
     static std::u16string stringToUtf16(std::string& str);
     static std::string utf16ToString(std::vector<uint16>& u16source);
-    Object* getJString(ClassLoader* loader,std::string& localStr);//cpp string to java string
-    Object* newJString(ClassLoader* loader,std::string& localStr);
+    Object* internString(Object* jstr);
+    Object* getJString(ClassLoader* loader,std::string localStr);//cpp string to java string
+    Object* newJString(ClassLoader* loader,std::string localStr);
     std::string getlocalString(Object* jStr);
 
     void debug();

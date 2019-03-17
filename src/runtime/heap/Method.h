@@ -28,7 +28,7 @@ struct MethodDescriptorParser {
     void startParams();
     void endParams();
     void finish();
-    void causeError();
+    void causeError(int code);
     uint8 readUint8();
     void unreadUint8();
     void parseParamTypes();
@@ -49,6 +49,7 @@ struct Method: public ClassMember {
     Method(MethodInfo* methodInfo,Class* classRef);
     static std::vector<Method*> parseMethods(ClassFile* classFile,Class* classRef);
     static void interpret(Method* method,bool logTag,std::vector<std::string> args);
+    void injectCodeAttribute(std::string returnType);
     void debug();
 };
 

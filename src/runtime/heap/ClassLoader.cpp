@@ -2,6 +2,7 @@
 // Created by xuranus on 2/11/19.
 //
 
+#include <map>
 #include "ClassLoader.h"
 #include "../../classfile/ClassReader.h"
 #include "../../util/Console.h"
@@ -13,6 +14,8 @@ ClassLoader::ClassLoader(ClassPath *cp, bool _verboseClass)
     verboseClass = _verboseClass;
     classPath = cp;
     classMap.clear();
+    loadBasicClasses();
+    loadPrimitiveClasses();
 }
 
 Class* ClassLoader::loadClass(std::string className)
@@ -20,12 +23,19 @@ Class* ClassLoader::loadClass(std::string className)
     if(classMap[className]!= nullptr)
         return classMap[className];
     else {
+        Class* ret = nullptr;
         if(verboseClass)
             Console::printlnBlue("[ClassLoader]: loading:" + className);
         if (className[0] == '[')
-            return loadArrayClass(className);
+            ret = loadArrayClass(className);
         else
-            return loadNonArrayClass(className);
+            ret = loadNonArrayClass(className);
+        if(classMap.find("java/lang/Object") != classMap.end()) {
+            Class* jlClassClass = classMap["java/lang/Object"];
+            ret->jClass = jlClassClass->newObject();
+            ret->jClass->extra = ret;
+        }
+        return ret;
     }
 }
 
@@ -51,6 +61,45 @@ Class* ClassLoader::loadArrayClass(std::string className)
     if(verboseClass)
         Console::printlnBlue("[ClassLoader]: loaded: "+className);//+" addr:"+std::to_string((long)_class));
     return _class;
+}
+
+void ClassLoader::loadBasicClasses()
+{
+    auto jlClassClass = loadClass("java/lang/Class");
+    for(auto &_class:classMap) {
+        if(_class.second->jClass== nullptr) {
+            _class.second->jClass = jlClassClass->newObject();
+            _class.second->jClass->extra = _class.second;
+        }
+    }
+}
+
+void ClassLoader::loadPrimitiveClasses() {
+    std::map<std::string,std::string> primitiveTypes;
+    primitiveTypes["void"] = "V";
+    primitiveTypes["boolean"] = "Z";
+    primitiveTypes["byte"] = "B";
+    primitiveTypes["short"] = "S";
+    primitiveTypes["int"] = "I";
+    primitiveTypes["long"] = "J";
+    primitiveTypes["char"] = "C";
+    primitiveTypes["float"] = "F";
+    primitiveTypes["double"] = "D";
+    for(auto& p:primitiveTypes) {
+        loadPrimitiveClass(p.first);
+    }
+}
+
+void ClassLoader::loadPrimitiveClass(std::string className) {
+    auto _class = new Class();
+    _class->accessFlags = ACC_PUBLIC_FLAG;
+    _class->name = className;
+    _class->classloader = this;
+    _class->initStarted = true;
+    _class->jClass = classMap["java/lang/Class"]->newObject();
+    _class->jClass->extra = _class;
+    classMap[className] = _class;
+    //Console::printlnInfo("loadPrimitiveClass("+className+") addr:"+std::to_string((long)_class));
 }
 
 Class* ClassLoader::getPrimitiveArrayClass(u1 atype)

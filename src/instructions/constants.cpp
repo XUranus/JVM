@@ -10,6 +10,7 @@
 #include "../runtime/Frame.h"
 #include "../runtime/heap/StringPool.h"
 #include "../util/Console.h"
+#include "../runtime/heap/SymRef.h"
 
 void nop::excute(Frame *frame) {
     //do nothing
@@ -231,6 +232,11 @@ void ldc::excute(Frame *frame) {
             auto internedStr = StringPool::getStringPool()->getJString(_class->classloader,c);
             stack.pushRef(internedStr);
             break;
+        }
+        case Constant::ValueType::REF: {
+            auto classRef = (ClassRef*)cp->getRef(index);
+            auto classObj = classRef->resolvedClass()->jClass;
+            stack.pushRef(classObj);
         }
         default:{
             printf("ldc not fully implemented. type: %d\n",type);

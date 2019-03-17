@@ -181,6 +181,19 @@ double OperandStack::popDouble()
     return *(double*)(&t);
 }
 
+void OperandStack::pushBoolean(bool v)
+{
+    if(v)
+        pushInt(1);
+    else
+        pushInt(0);
+}
+
+bool OperandStack::popBoolean()
+{
+    return popInt()==1;
+}
+
 void OperandStack::pushRef(Object *ref)
 {
     data[size].type = Slot::Type::REF;

@@ -1,6 +1,9 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include "util/ShellCommand.h"
+#include "runtime/heap/StringPool.h"
+#include "native/NativeRegistry.h"
 
 /*
 #include "../test/classFileTest/Test1.cpp"
@@ -11,13 +14,11 @@
 #include "../test/testClassLoader/Test6.cpp"
 */
 
-#include "util/ShellCommand.h"
-#include "runtime/heap/StringPool.h"
-
 using namespace std;
 
 
 int main(int args,char* argv[]) {
+    NativeRegistry::getNativeRegistery()->init();
 
     //Test1::excute();
     //Test2::excute();

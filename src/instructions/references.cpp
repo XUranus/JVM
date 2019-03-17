@@ -8,8 +8,10 @@
 #include "../util/Console.h"
 #include "../runtime/heap/ClassLoader.h"
 #include "../runtime/heap/StringPool.h"
+#include "../native/NativeRegistry.h"
 
 void InvokeMethodLogic::invokeMethod(Frame *invokerFrame, Method *method) {
+    //invokerFrame->debug();
 	auto thread = invokerFrame->thread;
 	auto newFrame = new Frame(method);
 	thread->pushFrame(newFrame);
@@ -24,22 +26,24 @@ void InvokeMethodLogic::invokeMethod(Frame *invokerFrame, Method *method) {
 	}
 
 	//TODO::hack!
+	/*
 	if(method->accessFlags & ACC_NATIVE_FLAG)
 	{
 		if(method->name=="registerNatives") {
-            thread->popFrame();
+            //thread->popFrame();
             //Console::printlnRed("registerNatives");
+            NativeRegistry::getNativeRegistery()->init();
         } else {
 			Console::printlnWarning("Native Method:"+method->_class->name+"."+method->name+method->descriptor);thread->debug();
-			thread->popFrame();
+			//thread->popFrame();
 			Console::printlnWarning("after pop:"+std::to_string(thread->stack.size));
 		}
 	}
+	 */
 }
 
-void InvokeMethodLogic::_print(Frame *frame, std::string descriptor) //TODO::hack!
+void InvokeMethodLogic::_print(OperandStack& stack, std::string descriptor) //TODO::hack!
 {
-	auto &stack = frame->operandStack;
 	if(descriptor=="(Z)V")
 		printf("%d",stack.popInt()!=0);
 	else if(descriptor=="(C)V")
@@ -63,9 +67,8 @@ void InvokeMethodLogic::_print(Frame *frame, std::string descriptor) //TODO::hac
 	stack.popRef();
 }
 
-void InvokeMethodLogic::_println(Frame *frame, std::string descriptor) //TODO::hack!
+void InvokeMethodLogic::_println(OperandStack& stack, std::string descriptor) //TODO::hack!
 {
-    auto &stack = frame->operandStack;
     if(descriptor=="(Z)V")
         printf("%d\n",stack.popInt()!=0);
     else if(descriptor=="(C)V")
@@ -227,7 +230,7 @@ void getfield::excute(Frame *frame) {
 #endif
 }
 
-void putfield::excute(Frame *frame) {printf("here");
+void putfield::excute(Frame *frame) {
     auto currentMethod = frame->method;
     auto currentClass = currentMethod->_class;
     auto cp = currentClass->constantPool;
@@ -318,17 +321,17 @@ void invokevirtual::excute(Frame *frame) {
 
 	//frame->debug();
 	//resolvedMethod->debug();
-
 	auto ref = frame->operandStack.getRefFromTop(resolvedMethod->argSlotCount-1);
+
 
 	if(methodRef->name=="print") {//todo:: hack!!!
 		//Console::printlnWarning("hack println()");
-		InvokeMethodLogic::_print(frame, methodRef->descriptor);
+		InvokeMethodLogic::_print(frame->operandStack, methodRef->descriptor);
 		return;
 	}
     if(methodRef->name=="println") {//todo:: hack!!!
         //Console::printlnWarning("hack println()");
-        InvokeMethodLogic::_println(frame, methodRef->descriptor);
+        InvokeMethodLogic::_println(frame->operandStack, methodRef->descriptor);
         return;
     }
 	//Console::printlnException("java.lang.NullPointerException");

@@ -29,6 +29,7 @@ Class::Class(ClassFile *classFile) {
     interfaces.clear();//init later in define() -> resolveInterfaces();
     classloader = nullptr;//init later in defineClass()
 
+    jClass = nullptr;
     initStarted = false;//TODO::???!!
 }
 
@@ -51,6 +52,7 @@ Class::Class(std::string &arrayClassName):name(arrayClassName)
     superClass = nullptr;
     interfaces.clear();
     classloader = nullptr;
+    jClass = nullptr;
     initStarted = true;
 }
 
@@ -134,6 +136,21 @@ void Class::initializeStaticFinalVar(Field *field)
     }
 }
 
+Method* Class::getInstanceMethod(std::string _name, std::string _descriptor) {
+    return getMethod(_name,_descriptor, false);
+}
+
+Object* Class::getRefVar(std::string fieldName, std::string fieldDescriptor) {
+    auto field = getField(fieldName,fieldDescriptor,true);
+    return staticVars->getRef(field->slotId);
+}
+
+void Class::setRefVar(std::string fieldName, std::string fieldDescriptor, Object *ref)
+{
+    auto field = getField(fieldName,fieldDescriptor,true);
+    staticVars->setRef(field->slotId,ref);
+}
+
 bool Class::accessibleTo(Class *c)
 {
     return (accessFlags & ACC_PUBLIC_FLAG) || (c->getPackageName()==getPackageName());
@@ -146,6 +163,20 @@ std::string Class::getPackageName()
     if(index!=std::string::npos)
         return name.substr(0,index);
     return "";
+}
+
+Method* Class::getMethod(std::string _name, std::string _descriptor, bool isStatic)
+{
+    for(auto c = this;c != nullptr;c = c->superClass)
+    {
+        for(auto method:c->methods)
+        {
+            if(((method->accessFlags & ACC_STATIC_FLAG)==isStatic) && (method->name == _name) && (method->descriptor==_descriptor))
+                return method;
+        }
+    }
+    Console::printlnWarning("could not get "+std::string((isStatic?"static":"unstatic"))+" method:"+_name+_descriptor);
+    return nullptr;
 }
 
 Field* Class::getField(std::string _name, std::string descriptor, bool isStatic)
@@ -348,6 +379,20 @@ bool Class::isArray()
     return name[0]=='[';
 }
 
+bool Class::isPrimitive() {
+    std::map<std::string,std::string> primitiveTypes;
+    primitiveTypes["void"] = "V";
+    primitiveTypes["boolean"] = "Z";
+    primitiveTypes["byte"] = "B";
+    primitiveTypes["short"] = "S";
+    primitiveTypes["int"] = "I";
+    primitiveTypes["long"] = "J";
+    primitiveTypes["char"] = "C";
+    primitiveTypes["float"] = "F";
+    primitiveTypes["double"] = "D";
+    return primitiveTypes.find(name)==primitiveTypes.end();
+}
+
 bool Class::isAssignableFrom(Class *s)
 {
     if(this==s)
@@ -441,6 +486,15 @@ bool Class::isJioSerializable()
     return name == "java/lang/Serializable";
 }
 
+
+std::string Class::getJavaName()
+{
+    std::string javaName = name;
+    for(auto& c:javaName) {
+        if(c=='/') c = '.';
+    }
+    return javaName;
+}
 
 Method* Class::getClinitMethod()
 {

@@ -26,17 +26,17 @@ struct Class {
     std::vector<std::string> interfacesNames;
     ConstantPool* constantPool;
     std::vector<Field*> fields;
-std::vector<Method*> methods;
+    std::vector<Method*> methods;
     ClassLoader* classloader;
     Class* superClass;
     std::vector<Class*> interfaces;
     unsigned int instanceSlotCount;
     unsigned int staticSlotCount;
     StaticVars* staticVars;
-
+    Object* jClass;//java.lang.Class instance
     bool initStarted;
 
-
+    Class() = default;
     explicit Class(ClassFile* classFile);
     explicit Class(std::string& arrayClassName);//for array construct
     //~Class();//TODO::implement it
@@ -50,6 +50,11 @@ std::vector<Method*> methods;
 
     bool accessibleTo(Class* c);
     std::string getPackageName();
+
+    Method* getInstanceMethod(std::string _name,std::string _descriptor);
+    void setRefVar(std::string fieldName,std::string fieldDescriptor,Object* ref);
+    Object* getRefVar(std::string fieldName,std::string fieldDescriptor);
+    Method* getMethod(std::string name,std::string _descriptor,bool isStatic);
     Field* getField(std::string name,std::string descriptor,bool isStatic);
     Field* lookUpField(std::string name,std::string descriptor);
     Method* lookUpMethod(std::string name,std::string descriptor);
@@ -68,6 +73,7 @@ std::vector<Method*> methods;
     Class* componentClass();
 
     bool isArray();
+    bool isPrimitive();
     bool isAssignableFrom(Class* c);
     bool isSubClassOf(Class* c);
     bool isSuperClassOf(Class* c);
@@ -77,6 +83,8 @@ std::vector<Method*> methods;
     bool isSuperInterfacesOf(Class* c);
     bool isJlCloneable();
     bool isJioSerializable();
+
+    std::string getJavaName();
 
     Method* getClinitMethod();
     Method* getMainMethod();

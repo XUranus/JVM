@@ -48,7 +48,7 @@ std::u16string StringPool::stringToUtf16(std::string &str)
     return u16_str;
 }
 
-Object* StringPool::getJString(ClassLoader *loader, std::string& localStr)
+Object* StringPool::getJString(ClassLoader *loader, std::string localStr)
 {
     if(internedStrings.find(localStr)!=internedStrings.end())
         return internedStrings[localStr];
@@ -56,7 +56,7 @@ Object* StringPool::getJString(ClassLoader *loader, std::string& localStr)
         return newJString(loader,localStr);
 }
 
-Object* StringPool::newJString(ClassLoader *loader, std::string& localStr)
+Object* StringPool::newJString(ClassLoader *loader, std::string localStr)
 {
     //Console::printlnInfo("newJString["+localStr+"]");
     auto chars = stringToUtf16(localStr);
@@ -68,6 +68,17 @@ Object* StringPool::newJString(ClassLoader *loader, std::string& localStr)
     jstr->setRefVar("value","[C",jchars);
     internedStrings[localStr] = jstr;
     return jstr;
+}
+
+Object* StringPool::internString(Object *jstr)
+{
+    auto localStr = getlocalString(jstr);
+    if(internedStrings.find(localStr) != internedStrings.end()) {
+        return internedStrings[localStr];
+    }
+    internedStrings[localStr] = jstr;
+    return jstr;
+    //TODO::
 }
 
 void StringPool::debug()

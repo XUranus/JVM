@@ -52,6 +52,8 @@ struct OperandStack {
     long popLong();
     void pushDouble(double v);
     double popDouble();
+    void pushBoolean(bool v);
+    bool popBoolean();
     void pushRef(Object* ref);
     Object* popRef();
     void pushSlot(Slot s);

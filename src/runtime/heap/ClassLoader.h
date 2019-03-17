@@ -18,6 +18,9 @@ struct ClassLoader {
     Class* loadClass(std::string className);
     Class* loadNonArrayClass(std::string className);
     Class* loadArrayClass(std::string className);
+    void loadBasicClasses();
+    void loadPrimitiveClasses();
+    void loadPrimitiveClass(std::string className);
     Class* getPrimitiveArrayClass(u1 atype);
     Object* createArgsArrayObject(std::vector<std::string>& args);
 

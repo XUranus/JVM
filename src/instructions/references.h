@@ -12,12 +12,9 @@ struct Frame;
 
 struct InvokeMethodLogic { //assist static method for 4 "invoke" instruction
     static void invokeMethod(Frame* frame,Method* method);
-    static void _println(Frame* frame,std::string descriptor);//todo::hack!
-    static void _print(Frame* frame,std::string descriptor);//todo::hack!
+    static void _println(OperandStack& stack,std::string descriptor);//todo::hack!
+    static void _print(OperandStack& stack,std::string descriptor);//todo::hack!
 };
-
-
-
 
 
 struct getstatic: public Index16Instruction {//0xB2

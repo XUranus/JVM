@@ -16,6 +16,7 @@ struct breakpoint: public NoOperandsInstruction {//0xCA
     void excute(Frame* frame);
 };
 
+//invokenative
 struct impdep1: public NoOperandsInstruction {//0xFE
     void excute(Frame* frame);
 };

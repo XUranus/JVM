@@ -13,6 +13,7 @@ struct Object {
     //all java Objects,the root
     Class* _class;
     void* data;
+    void* extra;
     unsigned int dataCount;
     enum DataType {
         INT8,INT16,INT32,INT64,UINT16,FLOAT32,FLOAT64,REF,SLOTS
@@ -22,6 +23,7 @@ struct Object {
     Object(Class* c, unsigned int count);//for array init
     Object(Class* c,void* _data,unsigned long _dataCount,DataType type);
     ~Object();
+    Object* clone();
     Slots* getFields();
     Object* getRefVar(std::string name,std::string descriptor);
     void setRefVar(std::string name,std::string descriptor,Object* ref);

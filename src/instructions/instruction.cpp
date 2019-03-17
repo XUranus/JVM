@@ -373,6 +373,7 @@ std::string Instruction::opCodeToName(u1 _opCode) {
         default:{
             printf("no such opCode: 0x%02x",_opCode);
             exit(1);
+            return "unknown"+std::to_string(_opCode);
         }
     }
 }

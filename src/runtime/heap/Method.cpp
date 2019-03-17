@@ -31,25 +31,25 @@ MethodDescriptor* MethodDescriptorParser::parse(std::string& descriptor)
 void MethodDescriptorParser::startParams()
 {
     if(readUint8()!='(')
-        causeError();
+        causeError(1);
 }
 
 void MethodDescriptorParser::endParams()
 {
     if(readUint8()!=')')
-        causeError();
+        causeError(2);
 }
 
 void MethodDescriptorParser::finish()
 {
     if(offset!=raw.length())
-        causeError();
+        causeError(3);
 }
 
-void MethodDescriptorParser::causeError()
+void MethodDescriptorParser::causeError(int code)
 {
-    //Console::printlnError("BAD descriptor: "+raw);
-    //exit(1);
+    Console::printlnError("BAD descriptor: "+raw+" code:"+std::to_string(code));
+    exit(1);
 }
 
 uint8 MethodDescriptorParser::readUint8()
@@ -90,7 +90,7 @@ void MethodDescriptorParser::parseReturnType()
         parsed->returnType = t;
         return;
     }
-    causeError();
+    causeError(4);
 }
 
 std::string MethodDescriptorParser::parseFieldType()
@@ -115,11 +115,12 @@ std::string MethodDescriptorParser::parseFieldType()
 
 std::string MethodDescriptorParser::parseObjectType()
 {
-    auto unread = raw.substr(0,offset);
+
+    auto unread = raw.substr(offset,raw.length());
     auto semicolonIndex = unread.find(';');
     if(semicolonIndex == -1)
     {
-        causeError();
+        causeError(5);
         return "";
     } else {
         auto objStart = offset - 1;
@@ -175,9 +176,33 @@ Method::Method(MethodInfo *methodInfo, Class *classRef)
         if(paramType == "J" || paramType == "D")//double or long
             argSlotCount++;
     }
-    if(!(accessFlags & ACC_STATIC_FLAG))
+    if(!(accessFlags & ACC_STATIC_FLAG)) {
         argSlotCount++;//non static method has "this" ref param
+    }
 
+    if(accessFlags & ACC_NATIVE_FLAG) {
+        injectCodeAttribute(parsedDescriptor->returnType);
+    }
+}
+
+void Method::injectCodeAttribute(std::string returnType)
+{
+    maxStack = 4;
+    maxLocals = argSlotCount;
+    code.clear();
+    if(returnType[0] == 'V') {
+        code.push_back(0xfe);code.push_back(0xb1); //return
+    } else if(returnType[0] == 'D') {
+        code.push_back(0xfe);code.push_back(0xaf); //dreturn
+    } else if(returnType[0] == 'F') {
+        code.push_back(0xfe);code.push_back(0xae); //freturn
+    } else if(returnType[0] == 'J') {
+        code.push_back(0xfe);code.push_back(0xad); //lreturn
+    } else if(returnType[0] == 'L' || returnType[0] == '[') {
+        code.push_back(0xfe);code.push_back(0xb0); //areturn
+    } else {
+        code.push_back(0xfe);code.push_back(0xac); //iretyrb
+    }
 }
 
 std::vector<Method*> Method::parseMethods(ClassFile *classFile, Class *classRef)
@@ -236,7 +261,6 @@ void loop(Thread* thread,bool verboseInst)
 
         frame->nextPc = reader.pc;
         inst->excute(frame);
-        //frame->method->_class->constantPool->debug();printf("\n");
         if(thread->stackEmpty())
         {
             break;
