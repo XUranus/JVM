@@ -1,7 +1,9 @@
 public class NativeTest {
     public static void main(String[] args) {
-        System.out.println(void.class.getName()); // void
-        /*System.out.println(boolean.class.getName()); // boolean
+        String s = void.class.getName();
+        System.out.println(s);
+        /*System.out.println(void.class.getName()); // void
+        System.out.println(boolean.class.getName()); // boolean
         System.out.println(byte.class.getName()); // byte
         System.out.println(char.class.getName()); // char
         System.out.println(short.class.getName()); // short

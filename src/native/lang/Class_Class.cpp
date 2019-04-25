@@ -24,10 +24,6 @@ void Class_Class::init()
 void Class_Class::getPrimitiveClass(Frame *frame)
 {
     auto nameObj = frame->localVars.getRef(0);
-
-    Console::printlnRed("getPrimitiveClass()");
-    frame->debug();
-
     auto name = StringPool::getStringPool()->getlocalString(nameObj);
     auto loader = frame->method->_class->classloader;
     auto _class = loader->loadClass(name)->jClass;

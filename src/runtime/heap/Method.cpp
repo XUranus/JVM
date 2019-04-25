@@ -253,11 +253,10 @@ void loop(Thread* thread,bool verboseInst)
 
         if(verboseInst)
             Console::printlnYellow("[INST]:"+inst->toString());
-        //frame->debug();
-        //ObjectPool::getObjectPool()->debug();
 
-        //printf("[%d] <%s> starkSize=%d \n",i++,inst->toString().c_str(),frame->thread->stack.size);
-        //StringPool::getStringPool()->debug();
+        frame->debug();
+        //ObjectPool::getObjectPool()->debug();
+        StringPool::getStringPool()->debug();
 
         frame->nextPc = reader.pc;
         inst->excute(frame);

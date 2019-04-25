@@ -59,3 +59,5 @@ a fibonacci test case:
 show class loading process and instructions excuting:
 
 ![](screenshot/demo2.png)
+
+ - 4.25:add some native methods,but some bugs occured.
