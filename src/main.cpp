@@ -6,7 +6,7 @@
 #include "native/NativeRegistry.h"
 
 
-#define TEST_MODE 1
+//#define TEST_MODE 1
 
 #ifdef TEST_MODE
 #include "../test/ClassLoaderTest.cpp"
