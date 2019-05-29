@@ -22,7 +22,6 @@ using namespace std;
 
 int main(int args,char* argv[]) {
     NativeRegistry::getNativeRegistery()->init();
-
 #ifdef TEST_MODE
     ClassLoaderTest::excute();
 #endif
