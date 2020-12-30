@@ -32,7 +32,7 @@ struct ClassFile {
     u2 attributeCount;
     AttributeInfo** attributes;//[attributeCount];
 
-    ClassFile(){}
+    ClassFile();
     ~ClassFile();
     void debug();
     std::vector<std::string> getAccessFlagsNames();

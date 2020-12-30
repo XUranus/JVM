@@ -19,8 +19,9 @@
 
 class Entry { //interface
 public:
-    virtual std::pair<byte*,int> readClass(std::string classname)=0;
+    virtual int readClass(std::string classname, byte*& data)=0;
     virtual std::string toString()=0;
+    virtual ~Entry();
 
     static Entry* createEntry(std::string path);//public factory method
     static Entry* createCompositeEntry(std::string path);
@@ -29,29 +30,32 @@ public:
     static Entry* createWildcardEntry(std::string path);
 };
 
+
 struct DirEntry :public Entry{ //common dirs
     std::string absPath; //absolute path
 
-    std::pair<byte*,int> readClass(std::string classname) override;
+    int readClass(std::string classname, byte*& data) override;
     std::string toString() override;
-    explicit DirEntry(std::string path) ;
+    explicit DirEntry(const std::string& path) ;
 };
 
 struct ZipEntry :public Entry{ // *.zip ,*.jar file
     std::string absFilePath;
 
-    std::pair<byte*,int> readClass(std::string classname) override;
+    int readClass(std::string classname, byte*& data) override;
     std::string toString() override;
-
-    explicit ZipEntry(std::string zipfileName);
+    explicit ZipEntry(const std::string& zipfileName);
 };
+
 
 struct CompositeEntry :public Entry { //multiple directory,file separator ";" or "*"
     std::vector<Entry*> entries;
 
-    std::pair<byte*,int> readClass(std::string classname) override;
+    int readClass(std::string classname, byte*& data) override;
     std::string toString() override;
-    explicit CompositeEntry(std::string paths);
+    explicit CompositeEntry(const std::string& paths);
+
+    ~CompositeEntry();
 };
 
 

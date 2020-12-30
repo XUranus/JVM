@@ -36,7 +36,9 @@ void Console::printlnError(const std::string &str)
 
 void Console::printlnWarning(const std::string &str)
 {
+#ifdef ALLOW_WARNING
     printlnYellow("[Warning]: "+str);
+#endif
 }
 
 void Console::printlnInfo(const std::string &str)

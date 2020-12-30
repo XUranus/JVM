@@ -17,7 +17,7 @@ public:
 
     static void testReadBytes()
     {
-        ClassReader reader("/home/xuranus/CLionProjects/JVM/test/classFileTest/Sum.class");
+        ClassReader reader("/home/xuranus/CLionProjects/JVM/demos/Sum.class");
         reader.printAllHexBytes();
         u1 v1 = reader.readU1();
         u2 v2 = reader.readU2();
@@ -32,7 +32,7 @@ public:
     static void testReadClass()
     {
         printf("start testing read class..\n");
-        ClassReader reader("/home/xuranus/CLionProjects/JVM/test/classFileTest/Sum.class");
+        ClassReader reader("/home/xuranus/CLionProjects/JVM/demos/Sum.class");
         reader.parseClassFile()->debug();
     }
 

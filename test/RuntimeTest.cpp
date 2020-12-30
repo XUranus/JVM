@@ -15,7 +15,7 @@ struct RuntimeTest {
     //Test Sum.class instruction Excution
     static void excute()
     {
-        ClassReader reader("/home/xuranus/CLionProjects/JVM/test/classFileTest/Sum.class");
+        ClassReader reader("/home/xuranus/CLionProjects/JVM/demos/Sum.class");
         auto classFile = reader.parseClassFile();
         auto mainMethod = classFile->getMainMethod();
         if(mainMethod!= nullptr)

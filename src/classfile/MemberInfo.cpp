@@ -37,7 +37,7 @@ std::string MemberInfo::getName()
 
 void MemberInfo::debug()
 {
-    //TODO:implment it
+    //TODO:implement it
     printf("[Debug MemberInfo]\n");
     printf("name: %s\n",getName().c_str(),getDescriptorName().c_str());
     printf("descriptor: %s\n",getDescriptorName().c_str());
@@ -122,9 +122,9 @@ Attribute_ConstantValue* MemberInfo::getConstantValueAttribute()
 
 // override zone
 
-MethodInfo::MethodInfo():MemberInfo() {}
+//MethodInfo::MethodInfo():MemberInfo() {}
 
-FieldInfo::FieldInfo():MemberInfo() {}
+//FieldInfo::FieldInfo():MemberInfo() {}
 
 std::vector<std::string> MethodInfo::getAccessFlagsNames()
 {

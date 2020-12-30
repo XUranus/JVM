@@ -14,12 +14,14 @@ class ClassPathTest {
 public:
     static void excute() {
 
-        ///home/xuranus/Desktop/rt.jar (jre)
-        ClassPath classPath("","/home/xuranus/CLionProjects/JVM/test/classFileTest");
-        auto ret = classPath.readClass("java.lang.Object");
-        ClassReader reader(ret.first,ret.second);
+        //home/xuranus/Desktop/rt.jar (jre)
+        ClassPath classPath("","");
+        byte* data  = nullptr;
+        int n_bytes = classPath.readClass("java.lang.Object", data);
 
-        //reader.printAllHexBytes();
+        ClassReader reader(data, n_bytes);
+
+        reader.printAllHexBytes();
         reader.parseClassFile()->debug();
 
     }

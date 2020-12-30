@@ -13,10 +13,11 @@ struct ClassPath {
     Entry* extendClassPath;
     Entry* userClassPath;
 
-    std::string getUserPath(std::string cpOption);
-    std::string getJrePath(std::string jreOption);
-    ClassPath(std::string jreOption,std::string cpOption);
-    std::pair<byte*,int> readClass(std::string classname);//classname example : java/lang/Object ,not contain ".class" suffix
+    static std::string getUserPath(const std::string& cpOption);
+    static std::string getJrePath(const std::string& jreOption);
+    ClassPath(const std::string& jreOption,const std::string& cpOption);
+    ~ClassPath();
+    int readClass(const std::string& classname,byte*& data);//classname example : java/lang/Object ,not contain ".class" suffix
 
     void debug();
 };

@@ -9,8 +9,9 @@
 #include <vector>
 #include <zip.h>
 
+Entry::~Entry() {}
 
-
+//factory method
 Entry* Entry::createEntry(std::string path)
 {
     //printf("createEntry: %s\n",path.c_str());
@@ -37,7 +38,7 @@ Entry* Entry::createDirEntry(std::string path)
     return new DirEntry(FilePath::absolutePath(path));
 }
 
-Entry* Entry::createWildcardEntry(std::string path)
+Entry* Entry::createWildcardEntry(std::string path)//transform to composite entry
 {
     //printf("createWildCardEntry: %s\n",path.c_str());
     std::string absPath = FilePath::absolutePath(path.substr(0,path.length()-2)); //remove /*
@@ -61,8 +62,7 @@ Entry* Entry::createZipEntry(std::string path)
 }
 
 
-
-DirEntry::DirEntry(std::string path)
+DirEntry::DirEntry(const std::string& path)
 {
     absPath = path;
 }
@@ -72,17 +72,17 @@ std::string DirEntry::toString()
     return absPath;
 }
 
-std::pair<byte*,int> DirEntry::readClass(std::string classname)
+int DirEntry::readClass(std::string classname, byte*& data)
 {
-    return ClassReader::readAllBytes(FilePath::join(absPath,classname));
+    return ClassReader::readAllBytes(FilePath::join(absPath,classname), data);
 }
 
 
-CompositeEntry::CompositeEntry(std::string pathsStr)
+CompositeEntry::CompositeEntry(const std::string& pathsStr)
 {
     entries.clear();
     auto paths = FilePath::split(pathsStr,";");
-    for(auto path:paths)
+    for(auto &path:paths)
     {
         entries.push_back(createEntry(path));
     }
@@ -97,21 +97,25 @@ std::string CompositeEntry::toString()
     return paths;
 }
 
-std::pair<byte*,int> CompositeEntry::readClass(std::string classname)
+int CompositeEntry::readClass(std::string classname, byte*& data)
 {
-    byte* res;
     for(auto entry:entries)
     {
-        auto ret = entry->readClass(classname);
-        if(ret.first!= nullptr)
-            return ret;
+        int n_bytes = entry->readClass(classname,data);
+        if(n_bytes >= 0)
+            return n_bytes;
     }
-    return std::make_pair(nullptr,0);
+    data = nullptr;
+    return -1;
 }
 
+CompositeEntry::~CompositeEntry() {
+    for(auto entry:entries) {
+        delete entry;
+    }
+}
 
-
-ZipEntry::ZipEntry(std::string _absFilePath)
+ZipEntry::ZipEntry(const std::string& _absFilePath)
 {
     absFilePath = _absFilePath;
 }
@@ -121,7 +125,7 @@ std::string ZipEntry::toString()
     return absFilePath;
 }
 
-std::pair<byte*,int> ZipEntry::readClass(std::string classname)
+int ZipEntry::readClass(std::string classname,byte*& data)
 {
     //Console::printlnInfo("ZipEntry::readClass() "+classname);
     // absFilePath: /xxxx/xxxx/..../xxx.jar zip
@@ -129,10 +133,12 @@ std::pair<byte*,int> ZipEntry::readClass(std::string classname)
 
     int err = 0;
     zip *z = zip_open(absFilePath.c_str(), 0, &err);
+    //printf("%s",absFilePath.c_str());
     if(z == nullptr)
     {
-        Console::printlnError("open zip file failed");
-        return std::make_pair(nullptr,-1);
+        Console::printlnError("open zip file " + absFilePath + " failed");
+        data = nullptr;
+        return -1;
     }
 
     //Search for the file of given name
@@ -142,20 +148,23 @@ std::pair<byte*,int> ZipEntry::readClass(std::string classname)
     zip_stat(z, name, 0, &st);
 
     //Alloc memory for its uncompressed contents
-    byte *contents = new byte[st.size];
+    data = new byte[st.size];
 
     //Read the compressed file
     zip_file *f = zip_fopen(z, name, 0);
-    if(f== nullptr)// target  file not found
-        return std::make_pair(nullptr,0);
+    if(f == nullptr) {// target file not found
+        delete[] data;
+        data = nullptr;
+        return -1;
+    }
 
-    zip_fread(f, contents, st.size);
+    zip_fread(f, data, st.size);
     zip_fclose(f);
 
     //And close the archive
     zip_close(z);
 
-    return std::make_pair(contents,st.size);
+    return st.size;
 }
 
 

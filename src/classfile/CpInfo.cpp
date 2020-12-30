@@ -179,6 +179,10 @@ CONSTANT_Utf8::CONSTANT_Utf8(u1 tag, ClassReader &reader,CpInfo** constantPool):
     bytes = reader.readBytes(length);
 }
 
+CONSTANT_Utf8::~CONSTANT_Utf8() {
+    delete[] bytes;
+}
+
 CONSTANT_MethodHandle::CONSTANT_MethodHandle(u1 tag, ClassReader &reader,CpInfo** constantPool):CpInfo(tag,constantPool)
 {
     referenceKind = reader.readU1();

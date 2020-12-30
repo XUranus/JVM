@@ -232,13 +232,13 @@ Attribute_RuntimeInvisibleAnnotations::Attribute_RuntimeInvisibleAnnotations(u2 
         annoatations.emplace_back(Annotation(reader));
 }
 
-Attribute_RuntimeVisibleParamaterAnnotations::Attribute_RuntimeVisibleParamaterAnnotations(u2 _attributeNameAndIndex, u4 _attributeLength, CpInfo **_constantPool,ClassReader &reader):AttributeInfo(_attributeNameAndIndex,_attributeLength,_constantPool) {
+Attribute_RuntimeVisibleParameterAnnotations::Attribute_RuntimeVisibleParameterAnnotations(u2 _attributeNameAndIndex, u4 _attributeLength, CpInfo **_constantPool,ClassReader &reader):AttributeInfo(_attributeNameAndIndex,_attributeLength,_constantPool) {
     numParameters = reader.readU1();
     for(auto i=0;i<numParameters;i++)
         parameterAnnotations.emplace_back(ParameterAnnotation(reader));
 }
 
-Attribute_RuntimeInvisibleParamaterAnnotations::Attribute_RuntimeInvisibleParamaterAnnotations(u2 _attributeNameAndIndex, u4 _attributeLength, CpInfo **_constantPool,ClassReader &reader):AttributeInfo(_attributeNameAndIndex,_attributeLength,_constantPool) {
+Attribute_RuntimeInvisibleParameterAnnotations::Attribute_RuntimeInvisibleParameterAnnotations(u2 _attributeNameAndIndex, u4 _attributeLength, CpInfo **_constantPool,ClassReader &reader):AttributeInfo(_attributeNameAndIndex,_attributeLength,_constantPool) {
     numParameters = reader.readU1();
     for(auto i=0;i<numParameters;i++)
         parameterAnnotations.emplace_back(ParameterAnnotation(reader));

@@ -162,8 +162,8 @@ ConstantPool::ConstantPool(Class *classRef, ClassFile *classFile)
                 //ConstantInvokeDynamic
                 //ConstantMethodhanle
                 //ConstantMethodType
-                //printf("Warning: classfile constant pool to heap constant pool convert failed.unsupport constant: %s\n",classFileCpInfo->getCpInfoName().c_str());
-               // exit(1);
+                printf("classfile constant pool to heap constant pool convert failed. unsupport constant: %s\n",classFileCpInfo->getCpInfoName().c_str());
+                exit(1);
             }
         }
     }

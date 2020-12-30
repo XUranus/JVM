@@ -5,6 +5,7 @@
 #ifndef JVM_CONSOLE_H
 #define JVM_CONSOLE_H
 
+#define ALLOW_WARNING 1
 
 #include <cstdio>
 #include <string>

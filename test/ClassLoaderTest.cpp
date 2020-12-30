@@ -11,6 +11,7 @@
 #include "../src/util/ShellCommand.h"
 
 #include "../src/util/Console.h"
+#include "../src/Bootstrap.h"
 
 class ClassLoaderTest
 {
@@ -43,7 +44,8 @@ public:
 
     static void Main(int argc,char* argv[]) {
         ShellCommand cmd(argc,argv);
-        cmd.excute();
+        Bootstrap session(cmd);
+        session.run();
     }
 };
 

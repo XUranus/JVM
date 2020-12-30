@@ -137,13 +137,15 @@ struct AttributeInfo { //basic class
     u2 attributeNameAndIndex;
     u4 attributeLength;
 
-    CpInfo** constantPool;
+    CpInfo** constantPool;//for refer
     //u1 *info//[attributeLength];
 
     AttributeInfo(u2 attributeNameAndIndex,u4 attributeLength,CpInfo** constantPool);
     std::string getAttributeName();
     virtual void debug();
 };
+
+//Derived Classes
 
 struct Attribute_ConstantValue:public AttributeInfo {
     u2 constantValueIndex;
@@ -289,17 +291,17 @@ struct Attribute_RuntimeInvisibleAnnotations:public AttributeInfo {
     Attribute_RuntimeInvisibleAnnotations(u2 _attributeNameAndIndex,u4 _attributeLength,CpInfo** _constantPool,ClassReader& reader);
 };
 
-struct Attribute_RuntimeVisibleParamaterAnnotations:public AttributeInfo {
+struct Attribute_RuntimeVisibleParameterAnnotations:public AttributeInfo {
     u1 numParameters;
     std::vector<ParameterAnnotation> parameterAnnotations;//numParameters
-    Attribute_RuntimeVisibleParamaterAnnotations(u2 _attributeNameAndIndex,u4 _attributeLength,CpInfo** _constantPool,ClassReader& reader);
+    Attribute_RuntimeVisibleParameterAnnotations(u2 _attributeNameAndIndex,u4 _attributeLength,CpInfo** _constantPool,ClassReader& reader);
 };
 
-struct Attribute_RuntimeInvisibleParamaterAnnotations:public AttributeInfo {
+struct Attribute_RuntimeInvisibleParameterAnnotations:public AttributeInfo {
     //the same as the following!!
     u1 numParameters;
     std::vector<ParameterAnnotation> parameterAnnotations;//numParameters
-    Attribute_RuntimeInvisibleParamaterAnnotations(u2 _attributeNameAndIndex,u4 _attributeLength,CpInfo** _constantPool,ClassReader& reader);
+    Attribute_RuntimeInvisibleParameterAnnotations(u2 _attributeNameAndIndex,u4 _attributeLength,CpInfo** _constantPool,ClassReader& reader);
 };
 
 struct Attribute_AnnotationDefault:public AttributeInfo {

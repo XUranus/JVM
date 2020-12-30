@@ -7,7 +7,8 @@
 #include "../util/Console.h"
 #include <cstdlib>
 
-std::string ClassPath::getJrePath(std::string jreOption) {
+std::string ClassPath::getJrePath(const std::string& jreOption) {
+    //priority Xbootpath -> ./jre -> $JAVA_HOME/jre
     auto env = getenv("JAVA_HOME");
     if(!jreOption.empty() && FilePath::pathExists(jreOption))
         return jreOption;
@@ -21,18 +22,25 @@ std::string ClassPath::getJrePath(std::string jreOption) {
     }
 }
 
-std::string ClassPath::getUserPath(std::string cpOption)
+std::string ClassPath::getUserPath(const std::string& _cpOption)
 {
+    std::string cpOption = _cpOption;
     if(cpOption.empty())
         cpOption = FilePath::absolutePath(".");
     return cpOption;
 }
 
-ClassPath::ClassPath(std::string jreOption, std::string cpOption)
+ClassPath::ClassPath(const std::string& jreOption, const std::string& cpOption)
 {
     bootstrapClassPath = Entry::createEntry(FilePath::join(getJrePath(jreOption),"lib/*"));
     extendClassPath = Entry::createEntry(FilePath::join(getJrePath(jreOption),"lib/ext/*"));
     userClassPath = Entry::createEntry(getUserPath(cpOption));
+}
+
+ClassPath::~ClassPath() {
+    delete bootstrapClassPath;
+    delete extendClassPath;
+    delete userClassPath;
 }
 
 void ClassPath::debug()
@@ -44,9 +52,10 @@ void ClassPath::debug()
 }
 
 
-std::pair<byte*,int> ClassPath::readClass(std::string classname)
+int ClassPath::readClass(const std::string& _classname,byte*& data)
 {
     //replace . with /  -> ex:java/lang/Exception
+    std::string classname = _classname;
     for(auto &s:classname)
         if(s=='.')
             s = '/';
@@ -54,17 +63,17 @@ std::pair<byte*,int> ClassPath::readClass(std::string classname)
     if(!FilePath::hasSuffix(classname,".class"))
         classname = classname + ".class";
 
-    auto ret = bootstrapClassPath->readClass(classname);
-    if(ret.first!= nullptr)
-        return ret;
+    int n_bytes = 0;
 
-    ret = extendClassPath->readClass(classname);
-    if(ret.first!= nullptr)
-        return ret;
+    n_bytes = bootstrapClassPath->readClass(classname, data);
+    if(n_bytes >= 0) return n_bytes;
 
-    ret = userClassPath->readClass(classname);
-    if(ret.first!= nullptr)
-        return ret;
+    n_bytes = extendClassPath->readClass(classname, data);
+    if(n_bytes >= 0) return n_bytes;
 
-    return std::make_pair(nullptr,0);
+    n_bytes = userClassPath->readClass(classname, data);
+    if(n_bytes >= 0) return n_bytes;
+
+    //fail
+    return -1;
 }

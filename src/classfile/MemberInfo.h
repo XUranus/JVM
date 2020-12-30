@@ -19,13 +19,16 @@ struct MemberInfo {
     u2 nameIndex;
     u2 descriptorIndex;
     u2 attributesCount;
+
     AttributeInfo **attributes;//[attributesCount]
 
-    CpInfo** constantPool;
+    CpInfo** constantPool;//for refer
 
     MemberInfo();
+    virtual ~MemberInfo(){}//TODO:!!!
     std::string getName();
     std::string getDescriptorName();
+
     Attribute_ConstantValue* getConstantValueAttribute();
     Attribute_Code* getCodeAttribute();
 
@@ -35,14 +38,16 @@ struct MemberInfo {
 
 
 struct MethodInfo: public MemberInfo {
-    MethodInfo();
+    //MethodInfo();
+    ~MethodInfo(){};//TODO!!!
     std::vector<std::string> getAccessFlagsNames() override;
     void debug();
 };
 
 
 struct FieldInfo: public MemberInfo {
-    FieldInfo();
+    //FieldInfo();
+    ~FieldInfo(){};//TODO!!!
     std::vector<std::string> getAccessFlagsNames() override;
     void debug();
 };

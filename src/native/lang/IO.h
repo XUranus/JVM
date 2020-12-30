@@ -13,5 +13,4 @@ struct IO {
     static void println(Frame* frame);
 };
 
-
 #endif //JVM_IO_H

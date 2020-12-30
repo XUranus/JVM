@@ -15,37 +15,41 @@
 #include <sys/stat.h>
 #include "Console.h"
 
-std::string FilePath::absolutePath(std::string path)
+//TODO::test in win platform
+
+std::string FilePath::absolutePath(const std::string& path)
 {
     char absPathBuf[PATH_MAX];
     if(!realpath(path.c_str(),absPathBuf))
     {
-        printf("fetch absolute path failed.\n");
+        Console::printlnError("fetch absolute path failed: " + path);
         exit(1);
     }
     return std::string(absPathBuf);
 }
 
-std::string FilePath::join(std::string path, std::string filename)
+std::string FilePath::join(const std::string& _path, const std::string& _filename)
 {
+    std::string path = _path;
+    std::string filename = _filename;
     removeSideBlank(path);
     removeSideBlank(filename);
-    if(FilePath::hasSuffix(path,"/"))
+    const std::string separator = "/";
+    if(FilePath::hasSuffix(path,separator))
         return path + filename;
     else if(!filename.empty())
-        return path + "/" + filename;
+        return path + separator + filename;
     else
         return path;
 }
 
-bool FilePath::hasSuffix(std::string filepath, std::string suffix)
+bool FilePath::hasSuffix(const std::string& _filepath, const std::string& _suffix)
 {
+    //rt.jar has suffix JaR
+    std::string filepath = FilePath::toLowerCase(_filepath);
     removeSideBlank(filepath);
-    std::string lower = FilePath::toLowerCase(suffix);
-    std::string upper = FilePath::toUpperCase(suffix);
-    //Console::printlnInfo("hasSuffix() ["+filepath+"] ["+suffix+"]");
-    return ((filepath.rfind(lower)!=std::string::npos && (filepath.rfind(lower) + suffix.length() == filepath.length()))
-    || (filepath.rfind(upper)!=std::string::npos && (filepath.rfind(upper) + suffix.length() == filepath.length())));
+    std::string suffix = FilePath::toLowerCase(_suffix);
+    return filepath.rfind(suffix)!=std::string::npos && filepath.rfind(suffix) + suffix.length() == filepath.length();
 }
 
 
@@ -58,29 +62,31 @@ void FilePath::removeSideBlank(std::string &str)
     }
 }
 
-std::string FilePath::toLowerCase(std::string str)
+std::string FilePath::toLowerCase(const std::string& str)
 {
+    std::string ret = str;
     int offset = 'A'-'a';
-    for(auto &s:str){
+    for(auto &s:ret){
         if(s >= 'A' && s <= 'Z'){
             s -= offset;
         }
     }
-    return str;
+    return ret;
 }
 
-std::string FilePath::toUpperCase(std::string str)
+std::string FilePath::toUpperCase(const std::string& str)
 {
+    std::string ret = str;
     int offset = 'A'-'a';
-    for(auto &s:str){
+    for(auto &s:ret){
         if(s >= 'a' && s <= 'z'){
             s += offset;
         }
     }
-    return str;
+    return ret;
 }
 
-std::vector<std::string> FilePath::split(std::string s,std::string c)
+std::vector<std::string> FilePath::split(const std::string& s,const std::string& c)
 {
     std::vector<std::string> v;
     v.clear();
@@ -98,20 +104,20 @@ std::vector<std::string> FilePath::split(std::string s,std::string c)
     return v;
 }
 
-bool FilePath::isDirectory(std::string absPath)
+bool FilePath::isDirectory(const std::string& absPath)
 {
-    struct stat s;
+    struct stat s{};
     lstat(absPath.c_str(),&s);
     return S_ISDIR(s.st_mode);
 }
 
-std::vector<std::string> FilePath::getAllFileNames(std::string absPath)
+std::vector<std::string> FilePath::getAllFileNames(const std::string& absPath)
 {
     std::vector<std::string> ret;
     ret.clear();
     if(!isDirectory(absPath))
     {
-        printf("%s is not a valid directory !\n",absPath.c_str());
+        Console::printlnError(absPath + " is not a valid directory !");
         exit(1);
     }
 
@@ -120,7 +126,7 @@ std::vector<std::string> FilePath::getAllFileNames(std::string absPath)
     dir = opendir(absPath.c_str());
     if(dir== nullptr)
     {
-        printf("could not open directory: %s.\n",absPath.c_str());
+        Console::printlnError("could not open directory: " + absPath);
         exit(1);
     }
     while((filename = readdir(dir) )!= nullptr)
@@ -134,20 +140,21 @@ std::vector<std::string> FilePath::getAllFileNames(std::string absPath)
     return ret;
 }
 
-std::vector<std::string> FilePath::getAllDirNames(std::string absPath)
+std::vector<std::string> FilePath::getAllDirNames(const std::string& absPath)
 {
     std::vector<std::string> ret;
     ret.clear();
     auto allNames = getAllFileNames(absPath);
-    for(auto filename:allNames)
+    const std::string separator = "/";
+    for(auto &filename:allNames)
     {
-        if(isDirectory(absPath+"/"+filename))
+        if(isDirectory(absPath + separator + filename))
             ret.push_back(filename);
     }
     return ret;
 }
 
-std::vector<std::string> FilePath::getAllZipFileNames(std::string absPath)
+std::vector<std::string> FilePath::getAllZipFileNames(const std::string& absPath)
 {
     auto files = getAllFileNames(absPath);
     std::vector<std::string> ret;
@@ -159,7 +166,7 @@ std::vector<std::string> FilePath::getAllZipFileNames(std::string absPath)
     return ret;
 }
 
-bool FilePath::pathExists(std::string path)
+bool FilePath::pathExists(const std::string& path)
 {
     FILE* fp = fopen(path.c_str(),"r");
     return fp != nullptr;

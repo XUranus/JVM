@@ -24,7 +24,7 @@ struct ClassLoader {
     Class* getPrimitiveArrayClass(u1 atype);
     Object* createArgsArrayObject(std::vector<std::string>& args);
 
-    std::pair<byte*,long> readClass(std::string classname);
+    int readClass(std::string classname,byte*& data);
 
     Class* defineClass(byte* data,long length);
     void resolveSuperClass(Class* _class); //load and resolve super class ref

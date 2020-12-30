@@ -9,18 +9,17 @@
 #include <iostream>
 #include <string>
 
-
-#define CONSTANT_Class_tag 7
-#define CONSTANT_Fieldref_tag 9
-#define CONSTANT_Methodref_tag 10
-#define CONSTANT_InterfaceMethodref_tag 11
-#define CONSTANT_String_tag 8
+#define CONSTANT_Utf8_tag 1
 #define CONSTANT_Integer_tag 3
 #define CONSTANT_Float_tag 4
 #define CONSTANT_Long_tag 5
 #define CONSTANT_Double_tag 6
+#define CONSTANT_Class_tag 7
+#define CONSTANT_String_tag 8
+#define CONSTANT_Fieldref_tag 9
+#define CONSTANT_Methodref_tag 10
+#define CONSTANT_InterfaceMethodref_tag 11
 #define CONSTANT_NameAndType_tag 12
-#define CONSTANT_Utf8_tag 1
 #define CONSTANT_MethodHandle_tag 15
 #define CONSTANT_MethodType_tag 16
 #define CONSTANT_InvokeDynamic_tag 18
@@ -29,7 +28,7 @@ struct ClassReader;
 
 struct CpInfo {
     u1 tag;
-    CpInfo** constantPool;
+    CpInfo** constantPool;//CpInfo*[], this is for refer, will not delete
 
     static CpInfo* getConstantInfoByTag(u1 tag,ClassReader& reader,CpInfo** constantPool);
     CpInfo(u1 tag,CpInfo** constantPool);
@@ -55,6 +54,7 @@ struct CONSTANT_Utf8:public CpInfo {
     u1 *bytes;//bytes[length]
 
     CONSTANT_Utf8(u1 tag,ClassReader& reader,CpInfo** constantPool);
+    ~CONSTANT_Utf8();
     std::string getUtf8();
     void debug();
 };

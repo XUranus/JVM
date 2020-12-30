@@ -7,12 +7,51 @@
 #include "../util/Console.h"
 using namespace std;
 
+ClassFile::ClassFile() {
+    magic = 0;
+    minorVersion = 0;
+    majorVersion = 0;
+    constantPoolCount = 0;
+    constantPool = nullptr;//[constantPoolCount-1];
+    accessFlags = 0;
+    thisClass = 0;
+    superClass = 0;
+    interfaceCount = 0;
+    interfaces = nullptr;//[interfaceCount];//
+    fieldsCount = 0;
+    fields = nullptr;//[fieldsCount]
+    methodsCount = 0;
+    methods = nullptr;//[methodsCount-1];
+    attributeCount = 0;
+    attributes = 0;//[attributeCount];
+}
+
 ClassFile::~ClassFile() {
-    delete constantPool;
-    delete interfaces;
-    delete fields;
-    delete methods;
-    delete attributes;
+    /*
+    CpInfo** constantPool;//[constantPoolCount-1];
+    u2 *interfaces;//[interfaceCount];
+    FieldInfo** fields;//[fieldsCount]
+    MethodInfo** methods;//[methodsCount-1];
+    AttributeInfo** attributes;//[attributeCount];
+    */
+    //some of them are nullptr, free to delete all ptr
+    for(int i = 0; i < constantPoolCount; i++) {
+        delete constantPool[i];
+    }
+    for(int i = 0; i < fieldsCount; i++) {
+        delete fields[i];
+    }
+    for(int i = 0; i < methodsCount; i++) {
+        delete methods[i];
+    }
+    for(int i = 0; i < attributeCount; i++) {
+        delete attributes[i];
+    }
+    delete[] constantPool;
+    delete[] interfaces;
+    delete[] fields;
+    delete[] methods;
+    delete[] attributes;
 }
 
 void ClassFile::debug()
@@ -135,10 +174,10 @@ std::string ClassFile::getSourceFileName()
         if(attributes[i]->getAttributeName()=="SourceFile")
             return constantPool[attributes[i]->attributeNameAndIndex]->getUtf8();
     }
-    printf("read SourceFile name Error.\n");
+    Console::printlnError("read SourceFile name Error.");
     exit(1);
 }
 
 void ClassFile::verbose() {
-    debug();//fix latter
+    debug();//todo::fix latter
 }

@@ -27,106 +27,49 @@ ShellCommand::ShellCommand(int argc, char **argv) //construct by command line ar
 {
     helpFlag = false;
     versionFlag = false;
-    verboseClass = false;
-    verboseInst = false;
+    verboseClassFlag = false;
+    verboseInstFlag = false;
     classpyFlag = false;
+
     cpOption = "";
-    className = "";
     XjreOption = "";
 
-    for(int i=0;i<argc;i++)
+    className = "";
+
+    int i = 0;
+
+    for(i = 1;i < argc; i++) { //omit first argv, start to read option, classname
+        std::string option(argv[i]);
+        if(option =="-version") {
+            versionFlag = true;
+        } else if(option =="-help" || option == "-h") {
+            helpFlag = true;
+        } else if(option =="-verbose:class") {
+            verboseClassFlag = true;
+        } else if(option =="-verbose:inst") {
+            verboseInstFlag = true;
+        } else if(option =="-verbose") {
+            verboseClassFlag = true;
+            verboseInstFlag = true;
+        } else if(option =="-classpy") {
+            classpyFlag = true;
+        } else if((option =="-cp" || option == "-classpath") && i + 1 < argc) {
+            cpOption = std::string(argv[i+1]);
+            i++;
+        }  else if((option =="-Xjre" || option == "-Xbootclasspath") && i + 1 < argc) {
+            XjreOption = std::string(argv[i+1]);
+            i++;
+        } else { //option not start with "-", it must be a classname
+            className = std::string(argv[i]);
+            i++;
+            break;
+        }
+    }
+
+    //send the left args to jvm
+    for(;i < argc;i++)
     {
         args.emplace_back(std::string(argv[i]));
     }
 
-    for(int i=1;i<argc;i++) { //omit first argv
-        if(std::string(argv[i])=="-version") {
-            versionFlag = true;
-        } else if(std::string(argv[i])=="-help") {
-            helpFlag = true;
-        } else if(std::string(argv[i])=="-verbose:class") {
-            verboseClass = true;
-        } else if(std::string(argv[i])=="-verbose:inst") {
-            verboseInst = true;
-        } else if(std::string(argv[i])=="-verbose") {
-            verboseClass = verboseInst = true;
-        } else if(std::string(argv[i])=="-classpy") {
-            classpyFlag = true;
-        } else if(std::string(argv[i])=="-cp" && i+1<argc) {
-            cpOption = std::string(argv[i+1]);
-            i++;
-        }  else if(std::string(argv[i])=="-X" && i+1<argc) {
-            XjreOption = std::string(argv[i+1]);
-            i++;
-        }
-        else className = std::string(argv[i]);
-    }
-}
-
-
-void ShellCommand::excute()
-{
-    //debug();
-    if(versionFlag)
-        printVersion();
-    else if(helpFlag)
-        printHelp();
-    else if(classpyFlag)
-        classpy();
-    else
-        startJVM();
-}
-
-void ShellCommand::printVersion()
-{
-    printf("Java Virtual Machine [XUranus Toy Edition]\n");
-    printf("Version 1.0.0\n\n");
-}
-
-void ShellCommand::printHelp()
-{
-    printf("Usage: toyjava [options] <mainclass> [args]\n");
-    printf("\t\t(to start a class)\n");
-    printf("where options include:\n\n");
-    printf("\t-cp <class search path of directories and zip/jar files>\n");
-    printf("\t-verbose <class need to be shown detail>\n\n");
-}
-
-void ShellCommand::classpy() {
-    if(className.empty())
-    {
-        printHelp();
-        exit(0);
-    }
-
-    ClassPath classPath(XjreOption,cpOption);
-    auto ret = classPath.readClass(className);
-    ClassReader reader(ret.first,ret.second);
-    reader.parseClassFile()->verbose();
-}
-
-void ShellCommand::startJVM()
-{
-    if(className.empty())
-    {
-        printHelp();
-        exit(0);
-    }
-    ClassPath classPath(XjreOption,cpOption);
-    ClassLoader classLoader(&classPath,verboseClass);
-
-    //get class name
-    className = className.substr(className.rfind('/')+1,className.length());
-    auto mainClass = classLoader.loadClass(className);
-    auto mainMethod = mainClass->getMainMethod();
-    if(mainMethod == nullptr)
-    {
-        printf("main class not found.\n");
-        exit(0);
-    } else {
-        //mainMethod->debug();
-        Method::interpret(mainMethod,verboseInst,args);
-    }
-
-    //TODO::runtime object garbage collect
 }

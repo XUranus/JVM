@@ -42,8 +42,9 @@ Class* ClassLoader::loadClass(std::string className)
 Class* ClassLoader::loadNonArrayClass(std::string className)
 {
     //use classMap to store reference
-    auto ret = readClass(className);
-    auto _class = defineClass(ret.first,ret.second);
+    byte* data = nullptr;
+    int n_bytes = readClass(className,data);
+    auto _class = defineClass(data, n_bytes);
     link(_class);
     if(verboseClass)
         Console::printlnBlue("[ClassLoader]: loaded: "+className);//+" addr:"+std::to_string((long)_class));
@@ -133,16 +134,16 @@ Object* ClassLoader::createArgsArrayObject(std::vector<std::string>& args)
     return argsArr;
 }
 
-std::pair<byte*,long> ClassLoader::readClass(std::string classname)
+int ClassLoader::readClass(std::string classname, byte*& data)
 {
     //printf("readClass(%s)\n",classname.c_str());
-    auto ret = classPath->readClass(classname);
-    if(ret.first == nullptr)
+    int n_bytes = classPath->readClass(classname,data);
+    if(n_bytes < 0)
     {
         Console::printlnException("java.lang.ClassNotFoundException: " + classname);
         exit(1);
     }
-    return ret;
+    return n_bytes;
 }
 
 Class* ClassLoader::defineClass(byte *data, long length)

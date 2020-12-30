@@ -254,9 +254,9 @@ void loop(Thread* thread,bool verboseInst)
         if(verboseInst)
             Console::printlnYellow("[INST]:"+inst->toString());
 
-        frame->debug();
+        //frame->debug();
         //ObjectPool::getObjectPool()->debug();
-        StringPool::getStringPool()->debug();
+        //StringPool::getStringPool()->debug();
 
         frame->nextPc = reader.pc;
         inst->excute(frame);

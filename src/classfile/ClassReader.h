@@ -10,12 +10,12 @@
 #include <cstdio>
 
 struct ClassReader {
-    long data_size;//n bytes
-    long offset; //bytes numbers has read,default 0
+    int data_size;//n bytes
+    int offset; //bytes numbers has read,default 0
     u1 *data;
 
-    ClassReader(const std::string filename);
-    ClassReader(byte* d,long size);
+    ClassReader(const std::string &filename);
+    ClassReader(byte* d,int size);
     ~ClassReader();
     u1 readU1();
     u2 readU2();
@@ -26,7 +26,7 @@ struct ClassReader {
     AttributeInfo* readAttributeInfo(CpInfo** constantPool);
 
 
-    static std::pair<byte*,int> readAllBytes(std::string filename);
+    static int readAllBytes(const std::string &filename,byte*& data);
     void printAllHexBytes(); //print all hex bytes to debug
     ClassFile* parseClassFile();
 

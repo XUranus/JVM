@@ -7,12 +7,12 @@
 
 struct Object;
 
-struct Slot { //TODO::try union later
-    int num;
-    Object* ref;
+struct Slot { //8 byte in x86_64 arch, 4 byte in x86_32 arch
+    int num;//4 byte
+    Object* ref;//8 byte in x64_arch
     enum Type {
         NUM,REF,UNINITIALIZED,SLOT
-    } type;
+    } type;//4 byte
 
     Slot();
     bool isRef();
