@@ -2,27 +2,25 @@
 // Created by xuranus on 2/18/19.
 //
 
-#ifndef JVM_STRINGPOOL_H
-#define JVM_STRINGPOOL_H
+#ifndef JVM_STRING_POOL_H
+#define JVM_STRING_POOL_H
 
 #include <map>
 #include "Object.h"
 
-struct StringPool {
-    static StringPool* instance;
-    std::map<std::string,Object*> internedStrings;
+namespace heap {
 
-    static StringPool* getStringPool();
-    StringPool();
-    static std::u16string stringToUtf16(std::string& str);
-    static std::string utf16ToString(std::vector<uint16>& u16source);
-    Object* internString(Object* jstr);
-    Object* getJString(ClassLoader* loader,std::string localStr);//cpp string to java string
-    Object* newJString(ClassLoader* loader,std::string localStr);
-    std::string getlocalString(Object* jStr);
+    namespace StringPool {
 
-    void debug();
-};
+        static std::map<std::string, heap::Object*> internedStrings;
 
+        std::u16string stringToUtf16(const std::string &str);
+        std::string utf16ToString(const std::u16string &u16source);
+        heap::Object* internString(Object *jString);
+        heap::Object* JString(ClassLoader *loader, const std::string& localStr); //cpp string to java string
+        std::string localString(heap::Object *jString);
 
-#endif //JVM_STRINGPOOL_H
+    }
+}
+
+#endif //JVM_STRING_POOL_H

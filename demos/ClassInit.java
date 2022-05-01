@@ -1,4 +1,7 @@
 public class ClassInit {
+    /**
+     * Test Class <init>, <clinit>, getstatic, putstatic
+     */
     private int a;
     public static int b = 10;
 

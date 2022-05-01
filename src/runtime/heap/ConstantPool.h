@@ -2,83 +2,78 @@
 // Created by xuranus on 2/11/19.
 //
 
-#ifndef JVM_CONSTANTPOOL_H
-#define JVM_CONSTANTPOOL_H
+#ifndef JVM_HEAP_CONSTANTS_POOL_H
+#define JVM_HEAP_CONSTANTS_POOL_H
 
 #include <string>
+#include "../Slots.h"
+#include "Class.h"
+#include "SymRef.h"
+#include "../../classfile/ConstantsPool.h"
 
-struct Class;
-struct SymRef;
-struct ClassFile;
+namespace heap {
 
+    class Class;
+    class ClassRef;
+    class MethodRef;
+    class FieldRef;
+    class InterfaceMemberRef;
 
+    enum ConstantType {
+        NoneType = 0,
+        IntType = 1,
+        LongType = 2,
+        FloatType = 3,
+        DoubleType = 4,
 
-struct Constant{
-    struct Value { //TODO::union may be better
-        std::string stringValue;
-        int intValue;
-        long longValue;
-        float floatValue;
-        double doubleValue;
-        void* ref;
+        ClassRefType = 5,
+        FieldRefType = 6,
+        MethodRefType = 7,
+        InterfaceMemberRefType = 8,
+        StringType = 9,
+        UTF8Type = 10
+    };
 
-        Value();
-        ~Value();
-    } value;
+    class ConstantPool {
+    private:
+        int size;
+        runtime::Slots slots; // used to store int, long, float, double
+        void**  ptrs;  // used to store string*, SymRef*
+        ConstantType* constantType; // ConstantType[size]
+    public:
+        Class *klass; // for referring, refer to the class it belongs to
 
-    enum ValueType {
-        INT = 0,
-        LONG = 1,
-        FLOAT = 2,
-        DOUBLE = 3,
-        STRING = 4,
-        REF = 5
-    } type;
+    public:
+        ConstantPool(Class* classRef, classfile::ConstantsPool* constantsPool);
+        ~ConstantPool();
 
-    Constant();
-    ~Constant();
-    void setInt(int v);
-    void setLong(long v);
-    void setFloat(float v);
-    void setDouble(double v);
-    void setRef(void* _ref);
-    void setString(std::string str);
+        void setInt(unsigned int index, int v);
+        void setLong(unsigned int index, long v);
+        void setFloat(unsigned int index, float v);
+        void setDouble(unsigned int index, double v);
+        void setClassRef(unsigned int index, ClassRef *ref);
+        void setFieldRef(unsigned int index, FieldRef *ref);
+        void setMethodRef(unsigned int index, MethodRef *ref);
+        void setInterfaceMemberRef(unsigned int index, InterfaceMemberRef *ref);
+        void setString(unsigned int index, const std::string& str);
+        void setUTF8(unsigned int index, const std::string& str);
 
-    int getInt();
-    long getLong();
-    float getFloat();
-    double getDouble();
-    void* getRef();
-    std::string getString();
+        int intValue(unsigned int index) const;
+        long longValue(unsigned int index) const;
+        float floatValue(unsigned int index) const;
+        double doubleValue(unsigned int index) const;
+        ClassRef* classRefValue(unsigned int index) const;
+        FieldRef* fieldRefValue(unsigned int index) const;
+        MethodRef* methodRefValue(unsigned int index) const;
+        InterfaceMemberRef* interfaceMemberRefValue(unsigned int index) const;
+        std::string stringValue(unsigned int index) const;
+        std::string UTF8Value(unsigned int index) const;
 
-    std::string toString();
-};
+        ConstantType type(unsigned int index) const;
 
+        void dump() const;
+    };
 
-struct ConstantPool {
-    Class* _class;
-    Constant* constants;
-    int size;
+}
 
-    ConstantPool(Class* classRef,ClassFile* classFile);
-    ~ConstantPool();
-
-    void setInt(int index,int v);
-    void setLong(int index,long v);
-    void setFloat(int index,float v);
-    void setDouble(int index,double v);
-    void setRef(int index,void* _ref);
-    void setString(int index,std::string str);
-
-    int getInt(int index);
-    long getLong(int index);
-    float getFloat(int index);
-    double getDouble(int index);
-    void* getRef(int index);
-    std::string getString(int index);
-
-    int getType(int index);
-    void debug();
-};
-
-#endif //JVM_CONSTANTPOOL_H
+#endif //JVM_HEAP_CONSTANTS_POOL_H

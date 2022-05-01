@@ -7,18 +7,32 @@
 
 #include <string>
 #include <vector>
-#include "../../classfile/ClassFile.h"
+#include "../../basicType.h"
 
-struct Class;
+namespace heap {
+    class Class;
 
-struct ClassMember {
-    u2 accessFlags;
-    std::string name;
-    std::string descriptor;
-    Class* _class;
+    struct ClassMember {
+        u2 accessFlags;
+        std::string name;
+        std::string descriptor;
+        Class* klass; // for referring, do not release
+        std::string signature;
+        std::vector<u1> annotationData; // TODO:: init RuntimeVisibleAnnotationsAttribute
 
-    ClassMember();
-    bool accessibleTo(Class* d);
-};
+        ClassMember(u2 _accessFlags, const std::string& _name, const std::string& _descriptor, Class* _klass);
+        virtual ~ClassMember() = default;
+        bool accessibleTo(Class *d) const;
+
+        bool isPublic() const;
+        bool isPrivate() const;
+        bool isProtected() const;
+        bool isStatic() const;
+        bool isFinal() const;
+        bool isSynthetic() const;
+
+        std::vector<u1> getAnnotationData() const;
+    };
+}
 
 #endif //JVM_CLASSMEMBER_H

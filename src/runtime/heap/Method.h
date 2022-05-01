@@ -5,53 +5,69 @@
 #ifndef JVM_METHOD_H
 #define JVM_METHOD_H
 
-
 #include <string>
 #include <vector>
-#include "../../classfile/ClassFile.h"
+#include "ExceptionHandler.h"
+#include "../../classfile/Members.h"
 #include "ClassMember.h"
-#include <id3/sized_types.h>
+#include "MethodDescriptorParser.h"
 
-struct MethodDescriptor {
-    std::vector<std::string> parameterTypes;
-    std::string returnType;
+namespace heap {
+    class Class;
+    class ConstantPool;
+    class ClassLoader;
+    class ExceptionTable;
 
-    void addParameterType(std::string type);
-};
+    struct LineNumberTableEntry {
+        u2 startPC;
+        u2 lineNumber;
+    };
 
-struct MethodDescriptorParser {
-    std::string raw;
-    unsigned long offset;
-    MethodDescriptor* parsed;
+    struct Method : public ClassMember {
+    public:
+        u4                                  maxStack;
+        u4                                  maxLocals;
+        std::vector<u1>                     code;
+        std::vector<std::string>            parameterTypeDescriptors;
+        std::string                         returnTypeDescriptor;
+        u4                                  argSlotCount;
+        ExceptionTable*                     exceptionTable;
+        std::vector<LineNumberTableEntry>   lineNumberTable;
 
-    MethodDescriptor* parse(std::string& descriptor);//the builder design pattern
-    void startParams();
-    void endParams();
-    void finish();
-    void causeError(int code);
-    uint8 readUint8();
-    void unreadUint8();
-    void parseParamTypes();
-    void parseReturnType();
-    std::string parseFieldType();
-    std::string parseObjectType();
-    std::string parseArrayType();
-};
-
-struct Method: public ClassMember {
+        std::vector<u1>                     parameterAnnotationData; // TODO::
+        std::vector<u1>                     annotationDefaultData; // TODO::
 
 
-    unsigned int maxStack;
-    unsigned int maxLocals;
-    std::vector<byte> code;
-    unsigned int argSlotCount;
+        static Method* ShimMethod; // Shim method
 
-    Method(MethodInfo* methodInfo,Class* classRef);
-    static std::vector<Method*> parseMethods(ClassFile* classFile,Class* classRef);
-    static void interpret(Method* method,bool logTag,std::vector<std::string> args);
-    void injectCodeAttribute(std::string returnType);
-    void debug();
-};
+    private:
+        void injectCodeAttribute(std::string returnType);
 
+    public:
+        Method(classfile::MethodInfo *methodInfo, Class *classRef, heap::ConstantPool* constantPool);
+        Method(); // todo:: for shim method
+        ~Method();
+
+        int findExceptionHandlerPC(Class* exceptionClass, int pc);
+        int lineNumber(int pc);
+
+        [[nodiscard]] bool isConstructor() const;
+        [[nodiscard]] bool isClinit() const;
+        [[nodiscard]] bool isBridge() const;
+        [[nodiscard]] bool isVarargs() const;
+        [[nodiscard]] bool isNative() const;
+        [[nodiscard]] bool isAbstract() const;
+        [[nodiscard]] bool isStrict() const;
+        [[nodiscard]] bool isSynchronized() const;
+
+        std::vector<Class*> parameterTypes() const;
+        std::vector<Class*> exceptionTypes() const;
+        Class* returnType() const;
+
+        std::vector<u1> getParameterAnnotationData() const;
+        std::vector<u1> getAnnotationDefaultData() const;
+
+    };
+}
 
 #endif //JVM_METHOD_H

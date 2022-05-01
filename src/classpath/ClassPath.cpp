@@ -3,77 +3,94 @@
 //
 
 #include "ClassPath.h"
-#include "../util/FilePath.h"
-#include "../util/Console.h"
-#include <cstdlib>
+#include "../common/FilePath.h"
+#include "../common/Console.h"
+#include "../common/Exception.h"
 
-std::string ClassPath::getJrePath(const std::string& jreOption) {
-    //priority Xbootpath -> ./jre -> $JAVA_HOME/jre
-    auto env = getenv("JAVA_HOME");
-    if(!jreOption.empty() && FilePath::pathExists(jreOption))
-        return jreOption;
-    else if(FilePath::pathExists("./jre"))
-        return "./jre";
-    else if(env!= nullptr)
-        return FilePath::join(std::string(env),"jre");
-    else {
-        Console::printlnError("Can not find jre path.\n");
-        exit(1);
+namespace classpath {
+
+    ClassPath::ClassPath(const std::string &xBootClassPath, const std::string &cpOption) {
+        bootstrapClassPathEntry = std::unique_ptr<Entry>(Entry::createEntry(FilePath::join(getJrePath(xBootClassPath), "lib/*")));
+        extendClassPathEntry = std::unique_ptr<Entry>(Entry::createEntry(FilePath::join(getJrePath(xBootClassPath), "lib/ext/*")));
+        userClassPathEntry = std::unique_ptr<Entry>(Entry::createEntry(getUserPath(cpOption)));
     }
-}
 
-std::string ClassPath::getUserPath(const std::string& _cpOption)
-{
-    std::string cpOption = _cpOption;
-    if(cpOption.empty())
-        cpOption = FilePath::absolutePath(".");
-    return cpOption;
-}
+    std::string ClassPath::getUserPath(const std::string &cpOption) {
+        if (cpOption.empty()) {
+            return FilePath::absolutePath(".");
+        } else {
+            // cpOption do not need to be a path, it may contain several path:
+            // ./libs/classes;/home/java/classes/*
+            return cpOption;
+        }
+    }
 
-ClassPath::ClassPath(const std::string& jreOption, const std::string& cpOption)
-{
-    bootstrapClassPath = Entry::createEntry(FilePath::join(getJrePath(jreOption),"lib/*"));
-    extendClassPath = Entry::createEntry(FilePath::join(getJrePath(jreOption),"lib/ext/*"));
-    userClassPath = Entry::createEntry(getUserPath(cpOption));
-}
+    std::string ClassPath::getJrePath(const std::string &xBootClassPath) {
+        auto env = getenv("JAVA_HOME");
 
-ClassPath::~ClassPath() {
-    delete bootstrapClassPath;
-    delete extendClassPath;
-    delete userClassPath;
-}
+            // 1. user specified jre option
+        if (!xBootClassPath.empty() && FilePath::exists(FilePath::absolutePath(xBootClassPath))) {
+            return FilePath::absolutePath(xBootClassPath);
 
-void ClassPath::debug()
-{
-    printf("[classpath info]\n");
-    printf("bootstrapPath: %s\n",bootstrapClassPath->toString().c_str());
-    printf("extendPath: %s\n",extendClassPath->toString().c_str());
-    printf("userPath: %s\n",userClassPath->toString().c_str());
-}
+            // 2. $workingDir/jre
+#if defined(__linux__) || defined(__unix__)
+        } else if (FilePath::exists(FilePath::absolutePath("./jre"))) {
+            return FilePath::absolutePath("./jre");
+#endif
+#ifdef _MSC_VER
+        } else if(FilePath::exists(FilePath::absolutePath(".\\jre"))) {
+            return FilePath::absolutePath(".\\jre");
+#endif
+
+            // 3. $JAVA_HOME/jre
+        } else if (env != nullptr) {
+            return FilePath::join(std::string(env), "jre");
+        } else {
+            exception::fatal("Can not find jre path");
+        }
+        return "";
+    }
 
 
-int ClassPath::readClass(const std::string& _classname,byte*& data)
-{
-    //replace . with /  -> ex:java/lang/Exception
-    std::string classname = _classname;
-    for(auto &s:classname)
-        if(s=='.')
-            s = '/';
-    // classname won't take ".class" suffix! ->java/lang/Exception.class
-    if(!FilePath::hasSuffix(classname,".class"))
-        classname = classname + ".class";
 
-    int n_bytes = 0;
+    void ClassPath::dumpStatus() const {
+        std::cout << "[classpath]" << std::endl;
+        std::cout << "bootstrap path: " << bootstrapClassPathEntry->entryString() << std::endl;
+        std::cout << "extend path: " << extendClassPathEntry->entryString() << std::endl;
+        std::cout << "user path: " << userClassPathEntry->entryString() << std::endl;
+    }
 
-    n_bytes = bootstrapClassPath->readClass(classname, data);
-    if(n_bytes >= 0) return n_bytes;
 
-    n_bytes = extendClassPath->readClass(classname, data);
-    if(n_bytes >= 0) return n_bytes;
+    std::optional<classfile::BytesReader> ClassPath::readClass(const std::string& classname) const {
+        std::string _classname = classname;
+        //replace . with /
+        //example: java.lang.Exception java/lang/Exception
+        for (char &ch: _classname) {
+            if (ch == '.') {
+                ch = FilePath::separator[0];
+            }
+        }
+        // classname won't take ".class" suffix! ->java/lang/Exception.class
+        if (!FilePath::endsWith(_classname, ".class")) {
+            _classname = _classname + ".class";
+        }
 
-    n_bytes = userClassPath->readClass(classname, data);
-    if(n_bytes >= 0) return n_bytes;
+        auto reader = bootstrapClassPathEntry->readClass(_classname);
+        if (reader) {
+            return reader;
+        }
 
-    //fail
-    return -1;
+        reader = extendClassPathEntry->readClass(_classname);
+        if (reader) {
+            return reader;
+        }
+
+        reader = userClassPathEntry->readClass(_classname);
+        if (reader) {
+            return reader;
+        }
+
+        return std::nullopt;
+    }
+
 }

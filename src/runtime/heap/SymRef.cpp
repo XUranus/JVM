@@ -4,148 +4,129 @@
 
 #include "SymRef.h"
 #include "ClassLoader.h"
-#include "../../util/Console.h"
+#include "../../common/Exception.h"
+#include "ConstantPool.h"
 
-SymRef::SymRef() {
-    constantPool = nullptr;
-    className = "";
-    _class = nullptr;
-};
+namespace heap {
 
-void SymRef::resolveClassRef()
-{
-    auto d = constantPool->_class;
-    auto c = d->classloader->loadClass(className);
-    if(!c->accessibleTo(d))
-    {
-        Console::printlnError("java.lang.IllegalAccessError");
-        exit(1);
+    SymRef::SymRef(ConstantPool* _constantPool, const std::string& _className):
+        className(_className) {
+        constantPool = _constantPool;
+        klass = nullptr;
     }
-    _class = c;
-}
 
-Class* SymRef::resolvedClass()
-{
-    if(_class== nullptr)
-        resolveClassRef();
-    return _class;
-}
-
-MemberRef::MemberRef(CpInfo *constantMemberRef)
-{
-    className = constantMemberRef->getClassName();
-    auto ret = constantMemberRef->getNameAndDescriptor();
-    name = ret.first;
-    descriptor = ret.second;
-}
-
-FieldRef::FieldRef(ConstantPool *cp, CONSTANT_Fieldref *constantFieldrefInfo):MemberRef(constantFieldrefInfo)
-{
-    constantPool = cp;
-    field = nullptr;
-}
-
-void FieldRef::resolveFieldRef()
-{
-    auto d = constantPool->_class;
-    auto c = resolvedClass();
-    auto _field = c->lookUpField(name,descriptor);
-    if(_field== nullptr)
-    {
-        Console::printlnError("java.lang.NoSuchFieldError");
-        exit(1);
+    void SymRef::resolveClassRef() {
+        if(!klass) {
+            Class* d = constantPool->klass;
+            Class* c = d->classloader->loadClass(className);
+            if (!c->accessibleTo(d)) {
+                exception::fatal("java.lang.IllegalAccessError");
+            }
+            klass = c;
+        }
     }
-    if(!_field->accessibleTo(d))
-    {
-        Console::printlnError("java.lang.IllegalAccessError");
-        exit(1);
 
+    Class *SymRef::resolvedClass() {
+        if (klass == nullptr) {
+            resolveClassRef();
+        }
+        return klass;
     }
-    field = _field;
-}
 
-Field* FieldRef::resolvedField()
-{
-    if(field== nullptr)
-        resolveFieldRef();
-    return field;
-}
+    ClassRef::ClassRef(ConstantPool *_constantPool, const std::string &_classname):
+        SymRef(_constantPool, _classname) {}
 
-MethodRef::MethodRef(ConstantPool *cp, CONSTANT_Methodref *constantMethodRefInfo) :MemberRef(constantMethodRefInfo)
-{
-    constantPool = cp;
-    method = nullptr;
-}
+    MemberRef::MemberRef(const std::string &_className,
+                         const std::pair <std::string, std::string> &nameAndDescriptor,
+                         ConstantPool *_constantPool):
+                         SymRef(_constantPool, _className),
+                         name(nameAndDescriptor.first),
+                         descriptor(nameAndDescriptor.second) {}
 
-
-void MethodRef::resolveMethodRef()
-{
-   auto d = constantPool->_class;
-   auto c = resolvedClass();
-   if(c->accessFlags & ACC_INTERFACE_FLAG)
-   {
-       Console::printlnError("java.lang.IncompatibleClassChangeError");
-       exit(1);
-   }
-   auto _method = c->lookUpMethod(name,descriptor);
-   if(_method== nullptr)
-   {
-       Console::printlnError("java.lang.NoSuchMethodError");
-       exit(1);
-   }
-   if(!_method->accessibleTo(d))
-   {
-       Console::printlnError("java.lang.IllegalAccessError");
-       exit(1);
-   }
-   method = _method;
-   //method->debug();
-}
-
-Method* MethodRef::resolvedMethod()
-{
-    if(method == nullptr)
-        resolveMethodRef();
-    return method;
-}
-
-InterfaceMemberRef::InterfaceMemberRef(ConstantPool *cp, CONSTANT_InterfaceMethodref *constantInterfaceMethodRefInfo) :MemberRef(constantInterfaceMethodRefInfo)
-{
-    constantPool = cp;
-}
-
-Method* InterfaceMemberRef::resolvedInterfaceMethod()
-{
-    if(method==nullptr)
-        resolveInterfaceMethodRef();
-    return method;
-}
-
-void InterfaceMemberRef::resolveInterfaceMethodRef()
-{
-    auto d = constantPool->_class;
-    auto c = resolvedClass();
-    if(c->accessFlags & ACC_INTERFACE_FLAG)
-    {
-        Console::printlnError("java.lang.IncompatibleClassChangeError");
-        exit(1);
+    FieldRef::FieldRef(ConstantPool *cp, const std::string& _className, const std::pair<std::string, std::string>& _nameAndDescriptor):
+        MemberRef(_className, _nameAndDescriptor, cp) {
+        field = nullptr;
     }
-    auto _method = c->lookUpInterfaceMethod(name,descriptor);
-    if(_method== nullptr)
-    {
-        Console::printlnError("java.lang.NoSuchMethodError");
-        exit(1);
-    }
-    if(!_method->accessibleTo(d))
-    {
-        Console::printlnError("java.lang.IllegalAccessError");
-        exit(1);
-    }
-    method = _method;
-}
 
-ClassRef::ClassRef(ConstantPool *cp, CONSTANT_Class *classInfo)
-{
-    constantPool = cp;
-    className = classInfo->getClassName();
+    void FieldRef::resolveFieldRef() {
+        Class* d = constantPool->klass;
+        Class* c = resolvedClass();
+        Field* _field = c->lookUpField(name, descriptor);
+        if (_field == nullptr) {
+            exception::fatal("java.lang.NoSuchFieldError");
+        }
+        if (!_field->accessibleTo(d)) {
+            exception::fatal("java.lang.IllegalAccessError");
+        }
+        field = _field;
+    }
+
+    Field *FieldRef::resolvedField() {
+        if (field == nullptr) {
+            resolveFieldRef();
+        }
+        return field;
+    }
+
+
+    MethodRef::MethodRef(ConstantPool *cp, const std::string& _className, const std::pair<std::string, std::string>& nameAndDescriptor):
+        MemberRef(_className, nameAndDescriptor, cp) {
+        method = nullptr;
+    }
+
+
+    void MethodRef::resolveMethodRef() {
+        Class* d = constantPool->klass;
+        Class* c = resolvedClass();
+        if (c->isInterface()) {
+            exception::fatal("java.lang.IncompatibleClassChangeError");
+        }
+        Method* _method = c->lookUpMethod(name, descriptor);
+        if (_method == nullptr) {
+            exception::fatal("java.lang.NoSuchMethodError");
+        }
+        if (!_method->accessibleTo(d)) {
+            exception::fatal("java.lang.IllegalAccessError");
+        }
+        method = _method;
+    }
+
+    Method *MethodRef::resolvedMethod() {
+        if (method == nullptr) {
+            resolveMethodRef();
+        }
+        return method;
+    }
+
+    InterfaceMemberRef::InterfaceMemberRef(ConstantPool *cp, const std::string& _className, const std::pair<std::string, std::string>& nameAndDescriptor):
+        MemberRef(_className, nameAndDescriptor, cp) {
+        method = nullptr;
+    }
+
+    Method *InterfaceMemberRef::resolvedInterfaceMethod() {
+        if (method == nullptr) {
+            resolveInterfaceMethodRef();
+        }
+        return method;
+    }
+
+    void InterfaceMemberRef::resolveInterfaceMethodRef() {
+        Class* d = constantPool->klass;
+        Class* c = resolvedClass();
+        if (!c->isInterface()) {
+            exception::fatal("java.lang.IncompatibleClassChangeError");
+        }
+        Method* _method = c->lookUpInterfaceMethod(name, descriptor);
+        if (_method == nullptr) {
+            exception::fatal("java.lang.NoSuchMethodError");
+        }
+        if (!_method->accessibleTo(d)) {
+            exception::fatal("java.lang.IllegalAccessError");
+        }
+        method = _method;
+    }
+
+
+
+
 }

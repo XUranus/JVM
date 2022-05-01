@@ -6,40 +6,55 @@
 #define JVM_TEST1_H
 
 
-#include <cstdio>
+#include <bits/stdc++.h>
 #include "../src/classfile/ClassFile.h"
-#include "../src/classfile/ClassReader.h"
+#include "../src/classpath/ClassPath.h"
 
 using namespace std;
 
 class ClassFileTest{
 public:
 
-    static void testReadBytes()
-    {
-        ClassReader reader("/home/xuranus/CLionProjects/JVM/demos/Sum.class");
-        reader.printAllHexBytes();
-        u1 v1 = reader.readU1();
-        u2 v2 = reader.readU2();
-        u4 v3 = reader.readU4();
-        u4 v4 = reader.readU4();
-        printf("v1 = %02x\n",v1);
-        printf("v2 = %02x\n",v2);
-        printf("v3 = %02lx\n",v3);
-        printf("v4 = %02lx\n",v4);
+    static void testReadOneClass() {
+        classfile::BytesReader reader("/home/xuranus/CLionProjects/xjava/demos/BubbleSort.class");
+        classfile::ClassFile klass(reader);
+        klass.dumpClassFile();
     }
 
-    static void testReadClass()
-    {
-        printf("start testing read class..\n");
-        ClassReader reader("/home/xuranus/CLionProjects/JVM/demos/Sum.class");
-        reader.parseClassFile()->debug();
+    static void testReadFullJre() {
+        using namespace std::chrono;
+        const auto p1 = std::chrono::system_clock::now();
+
+        classpath::ClassPath classPath("/home/xuranus/CLionProjects/xjava/jre",//"/home/xuranus/CLionProjects/xjava/cmake-build-debug",//"/home/xuranus/CLionProjects/xjava/jre",
+                                       "/home/xuranus/CLionProjects/xjava/demos");
+        classPath.dumpStatus();
+        std::fstream in("/home/xuranus/CLionProjects/xjava/all.txt");
+        std::string classname;
+
+        int count = 0;
+        if(in.is_open()) {
+            while(!in.eof()) {
+                in >> classname;
+                auto reader = classPath.readClass(classname);
+                count++;
+                if (reader) {
+                    std::cout << "test " << classname;
+                    classfile::ClassFile klass(reader.value());
+                    klass.dumpClassFile();
+                    std::cout << " Done" << std::endl;
+                }
+            }
+        }
+
+
+        const auto p2 = std::chrono::system_clock::now();
+        long second = std::chrono::duration_cast<std::chrono::seconds>(p2 - p1).count();
+        std::cout << "parsed " << count << " files in " << second << std::endl;
     }
 
-    static void excute()
-    {
-        testReadBytes();
-        testReadClass();
+    static void execute() {
+        //testReadOneClass();
+        testReadFullJre();
     }
 
 };

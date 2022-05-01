@@ -4,180 +4,134 @@
 
 #include "ClassFile.h"
 #include <cstdio>
-#include "../util/Console.h"
-using namespace std;
+#include <memory>
+#include <cassert>
+#include <iostream>
+#include "../common/Exception.h"
 
-ClassFile::ClassFile() {
-    magic = 0;
-    minorVersion = 0;
-    majorVersion = 0;
-    constantPoolCount = 0;
-    constantPool = nullptr;//[constantPoolCount-1];
-    accessFlags = 0;
-    thisClass = 0;
-    superClass = 0;
-    interfaceCount = 0;
-    interfaces = nullptr;//[interfaceCount];//
-    fieldsCount = 0;
-    fields = nullptr;//[fieldsCount]
-    methodsCount = 0;
-    methods = nullptr;//[methodsCount-1];
-    attributeCount = 0;
-    attributes = 0;//[attributeCount];
-}
+namespace classfile {
+    ClassFile::ClassFile(BytesReader& reader) {
+        // check magic number
+        magic = reader.readU4();
+        if(magic != 0xcafebabe) {
+            exception::panic("java.lang.ClassFormatError: " + reader.sourceFile());
+        }
 
-ClassFile::~ClassFile() {
-    /*
-    CpInfo** constantPool;//[constantPoolCount-1];
-    u2 *interfaces;//[interfaceCount];
-    FieldInfo** fields;//[fieldsCount]
-    MethodInfo** methods;//[methodsCount-1];
-    AttributeInfo** attributes;//[attributeCount];
-    */
-    //some of them are nullptr, free to delete all ptr
-    for(int i = 0; i < constantPoolCount; i++) {
-        delete constantPool[i];
-    }
-    for(int i = 0; i < fieldsCount; i++) {
-        delete fields[i];
-    }
-    for(int i = 0; i < methodsCount; i++) {
-        delete methods[i];
-    }
-    for(int i = 0; i < attributeCount; i++) {
-        delete attributes[i];
-    }
-    delete[] constantPool;
-    delete[] interfaces;
-    delete[] fields;
-    delete[] methods;
-    delete[] attributes;
-}
+        minorVersion = reader.readU2();
+        majorVersion = reader.readU2();
 
-void ClassFile::debug()
-{
-    printf("magic: %02lx\n",magic);
-    printf("minorVersion: %02x\n",minorVersion);
-    printf("majorVersion: %02x\n",majorVersion);
-    printf("constantPoolCount: %02x\n",constantPoolCount);
+        // check version(JDK 1.8)
+        if(majorVersion < 45 || majorVersion > 52) {
+            exception::panic("java.lang.UnSupportedClassVersionError!");
+        }
 
-    for(u2 i=0;i<constantPoolCount;i++)
-    {
-        if(constantPool[i]!= nullptr)
-        {
-            printf("#%u\t = ",i);
-            constantPool[i]->debug();
-        } else
-            printf("#%u\t = nullptr\n",i);
+        constantPool = std::make_unique<ConstantsPool>(reader);
+
+        accessFlags = reader.readU2();
+        thisClass = reader.readU2();
+        superClass = reader.readU2();
+
+        interfaceCount = reader.readU2();
+        interfaces = new u2[interfaceCount];
+        for(u2 i = 0; i < interfaceCount; i++) {
+            interfaces[i] = reader.readU2();
+        }
+
+        fieldCount = reader.readU2();
+        fields.reserve(fieldCount);
+        for(u2 i = 0; i < fieldCount; i++) {
+            fields.push_back(std::make_unique<FieldInfo>(reader, constantPool.get()));
+        }
+
+        methodCount = reader.readU2();
+        methods.reserve(methodCount);
+        for(u2 i = 0; i < methodCount; i++) {
+            methods.push_back(std::make_unique<MethodInfo>(reader, constantPool.get()));
+        }
+
+        attributeCount = reader.readU2();
+        attributes.reserve(attributeCount);
+        for(u2 i = 0; i < attributeCount; i++) {
+            attributes.push_back(std::unique_ptr<AttributeInfo>(AttributeInfo::from(reader, constantPool.get())));
+        }
+
+        assert(reader.end());
     }
 
-    printf("accessFlags: %02x ",accessFlags);
-    for(const auto &af :getAccessFlagsNames())
-    {
-        printf("%s, ",af.c_str());
-    }
-    printf("\n");
-
-    printf("thisClass: %s\n",getThisClassName().c_str());
-    printf("superClass: %s\n",getSuperClassName().c_str());
-    printf("interfaceCount: 0x%04x\n",interfaceCount);
-    for(u2 i=0;i<interfaceCount;i++)
-    {
-        printf("interface[i]: %s\n",getInterfaceName(interfaces[i]).c_str());
+    std::vector<std::string> ClassFile::accessFlagsNames(u2 accessFlags) {
+        std::vector<std::string> ret;
+        if (accessFlags & ACC_PUBLIC_FLAG)      ret.emplace_back("ACC_PUBLIC");
+        if (accessFlags & ACC_FINAL_FLAG)       ret.emplace_back("ACC_FINAL");
+        if (accessFlags & ACC_SUPER_FLAG)       ret.emplace_back("ACC_SUPER");
+        if (accessFlags & ACC_INTERFACE_FLAG)   ret.emplace_back("ACC_INTERFACE");
+        if (accessFlags & ACC_ABSTRACT_FLAG)    ret.emplace_back("ACC_ABSTRACT");
+        if (accessFlags & ACC_SYNTHETIC_FLAG)   ret.emplace_back("ACC_SYNTHETIC");
+        if (accessFlags & ACC_ANNOTATION_FLAG)  ret.emplace_back("ACC_ANNOTATION");
+        if (accessFlags & ACC_ENUM_FLAG)        ret.emplace_back("ACC_ENUM");
+        return ret;
     }
 
-    printf("fieldsCount: 0x%04x\n",fieldsCount);
-    for(u2 i=0;i<fieldsCount;i++)
-    {
-        fields[i]->debug();
+    std::vector<std::string> ClassFile::accessFlagsNames() const {
+        return ClassFile::accessFlagsNames(accessFlags);
     }
 
-    printf("\n");
-    printf("methodCount: 0x%04x\n\n",methodsCount);
-    for(u2 i=0;i<methodsCount;i++)
-    {
-        printf("[%u] ",i);
-        methods[i]->debug();
-        printf("\n");
+    std::string ClassFile::className() const {
+        return constantPool->className(thisClass);
     }
 
-    printf("attrbutesCount: 0x%04x\n",attributeCount);
-    for(u2 i=0;i<attributeCount;i++)
-    {
-        attributes[i]->debug();
+    std::string ClassFile::superClassName() const {
+        if (superClass == 0) {
+            return "";
+        } else {
+            return constantPool->className(superClass);
+        }
     }
 
-}
-
-std::vector<std::string> ClassFile::getAccessFlagsNames(u2 accessFlags)
-{
-    std::vector<std::string> ret;
-    if(accessFlags&ACC_PUBLIC_FLAG) ret.emplace_back("ACC_PUBLIC");
-    if(accessFlags&ACC_FINAL_FLAG) ret.emplace_back("ACC_FINAL");
-    if(accessFlags&ACC_SUPER_FLAG) ret.emplace_back("ACC_SUPER");
-    if(accessFlags&ACC_INTERFACE_FLAG) ret.emplace_back("ACC_INTERFACE");
-    if(accessFlags&ACC_ABSTRACT_FLAG) ret.emplace_back("ACC_ABSTRACT");
-    if(accessFlags&ACC_SYNTHETIC_FLAG) ret.emplace_back("ACC_SYNTHETIC");
-    if(accessFlags&ACC_ANNOTATION_FLAG) ret.emplace_back("ACC_ANNOTATION");
-    if(accessFlags&ACC_ENUM_FLAG) ret.emplace_back("ACC_ENUM");
-    return ret;
-}
-
-std::vector<std::string> ClassFile::getAccessFlagsNames()
-{
-   return getAccessFlagsNames(accessFlags);
-}
-
-std::string ClassFile::getSuperClassName()
-{
-    if(superClass==0)
-        return "";
-    else
-        return constantPool[superClass]->getClassName();
-}
-
-std::string ClassFile::getThisClassName()
-{
-    return constantPool[thisClass]->getClassName();
-}
-
-std::string ClassFile::getInterfaceName(u2 index)
-{
-    return ((CONSTANT_Class*)constantPool[index])->getClassName();
-}
-
-
-std::vector<std::string> ClassFile::getInterfacesNames()
-{
-    std::vector<std::string> ret;
-    for(u2 i=0;i<interfaceCount;i++)
-    {
-        ret.push_back(getInterfaceName(interfaces[i]));
+    std::vector<std::string> ClassFile::interfacesNames() const {
+        std::vector<std::string> res;
+        for (u2 i = 0; i < interfaceCount; i++) {
+            res.push_back(constantPool->className(interfaces[i]));
+        }
+        return res;
     }
-    return ret;
-}
 
-MethodInfo* ClassFile::getMainMethod()
-{
-    for(auto i=0;i<methodsCount;i++)
-    {
-        if(methods[i]->getName()=="main" && methods[i]->getDescriptorName()=="([Ljava/lang/String;)V")
-            return methods[i];
+    const std::unique_ptr<MethodInfo>&& ClassFile::mainMethod() const {
+        for (u2 i = 0; i < methodCount; i++) {
+            if (methods[i]->name() == "main" && methods[i]->descriptor() == "([Ljava/lang/String;)V") {
+                return std::move(methods[i]);
+            }
+        }
+        return nullptr;
     }
-    return nullptr;
-}
 
-std::string ClassFile::getSourceFileName()
-{
-    for(auto i=0;i<attributeCount;i++)
-    {
-        if(attributes[i]->getAttributeName()=="SourceFile")
-            return constantPool[attributes[i]->attributeNameAndIndex]->getUtf8();
+    std::string ClassFile::sourceFileName() const {
+        for (u2 i = 0; i < attributeCount; i++) {
+            if (attributes[i]->name() == "SourceFile") {
+                u2 sourceFileIndex = ((AttributeSourceFile*)attributes[i].get())->sourceFileIndex;
+                return constantPool->utf8(sourceFileIndex);
+            }
+        }
+        //exception::panic("read SourceFile name Error.");
+        return "Unknown";
     }
-    Console::printlnError("read SourceFile name Error.");
-    exit(1);
-}
 
-void ClassFile::verbose() {
-    debug();//todo::fix latter
+
+    void ClassFile::dumpClassFile() const {
+        if(accessFlags & ACC_PUBLIC_FLAG) {
+            std::cout << "public ";
+        } else if(accessFlags & ACC_PRIVATE_FLAG) {
+            std::cout << "private ";
+        }
+        std::cout << "class " << className() << std::endl;
+        std::cout << "\tminor version: " << minorVersion << std::endl;
+        std::cout << "\tmajor version: " << majorVersion << std::endl;
+        std::cout << "\tflags: ";
+        for(const auto& flag: accessFlagsNames()) {
+            std::cout << flag << " ";
+        }
+        std::cout << std::endl;
+        constantPool->dump();
+    }
+
+
 }

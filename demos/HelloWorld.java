@@ -2,13 +2,13 @@ import java.lang.String;
 
 public class HelloWorld {
     /*
-    aim to test utf16 string
-     */
+    * Test utf16 string
+    */
     public static void main(String[] args) {
-        System.out.println("HelloWorld");
-        System.out.println("你好");
-        System.out.println("aaa");
-        System.out.println("sss");
-        System.out.println("ddd");
+        System.out.println("Hello World");
+        System.out.println("你好世界");
+        System.out.println("こんにちは世界");
+        System.out.println("مرحبا بالعالم");
+        System.out.println("Привет, мир");
     }
 }

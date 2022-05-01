@@ -3,248 +3,214 @@
 //
 
 #include "ConstantPool.h"
-#include "../../classfile/ClassFile.h"
 #include "SymRef.h"
+#include <cstring>
 
-/****************************************  constants methods  ******************************************/
+namespace heap {
 
-Constant::Value::Value() {
-    ref = nullptr;
-}
+    ConstantPool::ConstantPool(Class* classRef,
+                               classfile::ConstantsPool* constantsPool):
+        size(constantsPool->size()),
+        slots(constantsPool->size()) {
+        klass = classRef;
+        constantType = new ConstantType[size];
+        ptrs = new void*[size];
+        memset(constantType, ConstantType::NoneType, sizeof(ConstantType) * size);
 
-Constant::Value::~Value() {}
-
-Constant::Constant():value()
-{
-    type = REF;
-}
-
-Constant::~Constant() {}
-
-void Constant::setInt(int v)
-{
-    type = INT;
-    value.intValue = v;
-}
-
-void Constant::setLong(long v)
-{
-    type = LONG;
-    value.longValue = v;
-}
-
-void Constant::setFloat(float v)
-{
-    type = FLOAT;
-    value.floatValue = v;
-}
-
-void Constant::setDouble(double v)
-{
-    type = DOUBLE;
-    value.doubleValue = v;
-}
-
-void Constant::setRef(void* _ref)
-{
-    type = REF;
-    value.ref = _ref;
-}
-
-void Constant::setString(std::string str)
-{
-    type = STRING;
-    value.stringValue = str;
-}
-
-int Constant::getInt()
-{
-    return value.intValue;
-}
-
-long Constant::getLong()
-{
-    return value.longValue;
-}
-
-
-float Constant::getFloat()
-{
-    return value.floatValue;
-}
-
-double Constant::getDouble()
-{
-    return value.doubleValue;
-}
-
-void* Constant::getRef() {
-    return value.ref;
-}
-
-std::string Constant::getString()
-{
-    return value.stringValue;
-}
-
-std::string Constant::toString()
-{
-    std::string v = "";
-    std::string t = "";
-    switch (type)
-    {
-        case 0: t = "int"; v = std::to_string(getInt());break;
-        case 1: t = "long"; v = std::to_string(getLong()); break;
-        case 2: t = "float"; v = std::to_string(getFloat()); break;
-        case 3: t = "double"; v = std::to_string(getDouble()); break;
-        case 4: t = "string"; v = getString(); break;
-        case 5: t = "ref";v = std::to_string((long)getRef());break;
-    }
-    return "<"+t+","+v+">";
-}
-
-/****************************************  constant pool methods  ******************************************/
-
-ConstantPool::ConstantPool(Class *classRef, ClassFile *classFile)
-{
-    _class = classRef;
-    size = classFile->constantPoolCount;
-    constants = new Constant[size];
-    for(int i=1;i<size;i++)
-    {
-        auto classFileCpInfo = classFile->constantPool[i];
-        //printf("i=%u tag=%u\n",i,classFileCpInfo->tag);
-        switch (classFileCpInfo->tag)
-        {
-            case CONSTANT_Integer_tag:{
-                setInt(i,((CONSTANT_Integer*)classFileCpInfo)->getIntValue());
-                break;
+        for (int i = 0; i < size; i++) {
+            if(!constantsPool->constants[i]) {
+                continue;
             }
-            case CONSTANT_Long_tag:{
-                setLong(i,((CONSTANT_Long*)classFileCpInfo)->getLongValue());
-                i++;
-                break;
-            }
-            case CONSTANT_Float_tag:{
-                setFloat(i,((CONSTANT_Float*)classFileCpInfo)->getFloatValue());
-                break;
-            }
-            case CONSTANT_Double_tag:{
-                setDouble(i,((CONSTANT_Double*)classFileCpInfo)->getDoubleValue());
-                i++;
-                break;
-            }
-            case CONSTANT_String_tag:{
-                setString(i,((CONSTANT_String*)classFileCpInfo)->getStringValue());
-                break;
-            }
-            case CONSTANT_Utf8_tag:{
-                setString(i,((CONSTANT_Utf8*)classFileCpInfo)->getUtf8());
-                break;
-            }
-            case CONSTANT_Class_tag:{
-                setRef(i,new ClassRef(this,(CONSTANT_Class*)classFileCpInfo));
-                break;
-            }
-            case CONSTANT_Fieldref_tag:{
-                setRef(i,new FieldRef(this,(CONSTANT_Fieldref*)classFileCpInfo));
-                break;
-            }
-            case CONSTANT_Methodref_tag:{
-                setRef(i,new MethodRef(this,(CONSTANT_Methodref*)classFileCpInfo));
-                break;
-            }
-            case CONSTANT_InterfaceMethodref_tag:{
-                setRef(i,new InterfaceMemberRef(this,(CONSTANT_InterfaceMethodref*)classFileCpInfo));
-                break;
-            }
-            default:{
-                //ConstantInvokeDynamic
-                //ConstantMethodhanle
-                //ConstantMethodType
-                printf("classfile constant pool to heap constant pool convert failed. unsupport constant: %s\n",classFileCpInfo->getCpInfoName().c_str());
-                exit(1);
+            int tag = constantsPool->constants[i]->tag;
+            switch (tag) {
+                case CONSTANT_Integer: {
+                    setInt(i, constantsPool->intValue(i));
+                    break;
+                }
+                case CONSTANT_Long: {
+                    setLong(i, constantsPool->longValue(i));
+                    i++;
+                    break;
+                }
+                case CONSTANT_Float: {
+                    setFloat(i, constantsPool->floatValue(i));
+                    break;
+                }
+                case CONSTANT_Double: {
+                    setDouble(i, constantsPool->doubleValue(i));
+                    i++;
+                    break;
+                }
+                case CONSTANT_String: {
+                    setString(i, constantsPool->stringValue(i));
+                    break;
+                }
+                case CONSTANT_UTF8: {
+                    setUTF8(i, constantsPool->utf8(i));
+                    break;
+                }
+                case CONSTANT_Class: {
+                    setClassRef(i, new ClassRef(this, constantsPool->className(i)));
+                    break;
+                }
+                case CONSTANT_FieldRef: {
+                    auto res = constantsPool->memberRef(i);
+                    setFieldRef(i, new FieldRef(this, res.first, res.second));
+                    break;
+                }
+                case CONSTANT_MethodRef: {
+                    auto res = constantsPool->memberRef(i);
+                    setMethodRef(i, new MethodRef(this, res.first, res.second));
+                    break;
+                }
+                case CONSTANT_InterfaceMethodRef: {
+                    auto res = constantsPool->memberRef(i);
+                    setInterfaceMemberRef(i, new InterfaceMemberRef(this, res.first, res.second));
+                    break;
+                }
+                default: {
+                    // todo:: implement
+                    //ConstantInvokeDynamic
+                    //ConstantMethodHandle
+                    //ConstantMethodType
+                }
             }
         }
     }
-}
 
-ConstantPool::~ConstantPool()
-{
-    delete[] constants;
-}
-
-
-int ConstantPool::getInt(int index)
-{
-    return constants[index].getInt();
-}
-
-long ConstantPool::getLong(int index)
-{
-    return constants[index].getLong();
-}
-
-float ConstantPool::getFloat(int index)
-{
-    return constants[index].getFloat();
-}
-
-double ConstantPool::getDouble(int index)
-{
-    return constants[index].getDouble();
-}
+    ConstantPool::~ConstantPool() {
+        for(int i = 0; i < size; i++) {
+            if(constantType[i] == ConstantType::StringType) {
+                delete (std::string*)(ptrs[i]);
+            } else if(constantType[i] == ConstantType::ClassRefType) {
+                delete (ClassRef*)(ptrs[i]);
+            } else if(constantType[i] == ConstantType::MethodRefType) {
+                delete (MethodRef*)(ptrs[i]);
+            } else if(constantType[i] == ConstantType::FieldRefType) {
+                delete (FieldRef*)(ptrs[i]);
+            } else if(constantType[i] == ConstantType::InterfaceMemberRefType) {
+                delete (InterfaceMemberRef*)(ptrs[i]);
+            }
+        }
+        delete[] ptrs;
+        delete[] constantType;
+    }
 
 
-void * ConstantPool::getRef(int index)
-{
-    return constants[index].getRef();
-}
+    void ConstantPool::setInt(unsigned int index, int v) {
+        slots.setInt(index, v);
+        constantType[index] = ConstantType::IntType;
+    }
 
-std::string ConstantPool::getString(int index)
-{
-    return constants[index].getString();
-}
+    int ConstantPool::intValue(unsigned int index) const {
+        return slots.intValue(index);
+    }
 
-void ConstantPool::setInt(int index, int v)
-{
-    constants[index].setInt(v);
-}
+    void ConstantPool::setLong(unsigned int index, long v) {
+        slots.setLong(index, v);
+        constantType[index] = ConstantType::LongType;
+    }
 
-void ConstantPool::setLong(int index, long v)
-{
-    constants[index].setLong(v);
-}
+    long ConstantPool::longValue(unsigned int index) const {
+        return slots.longValue(index);
+    }
 
-void ConstantPool::setFloat(int index, float v)
-{
-    constants[index].setFloat(v);
-}
+    void ConstantPool::setFloat(unsigned int index, float v) {
+        slots.setFloat(index, v);
+        constantType[index] = ConstantType::FloatType;
+    }
 
-void ConstantPool::setDouble(int index, double v)
-{
-    constants[index].setDouble(v);
-}
+    float ConstantPool::floatValue(unsigned int index) const {
+        return slots.floatValue(index);
+    }
 
-void ConstantPool::setRef(int index, void *_ref)
-{
-    constants[index].setRef(_ref);
-}
+    void ConstantPool::setDouble(unsigned int index, double v) {
+        slots.setDouble(index, v);
+        constantType[index] = ConstantType::DoubleType;
+    }
 
-void ConstantPool::setString(int index, std::string str)
-{
-    constants[index].setString(str);
-}
+    double ConstantPool::doubleValue(unsigned int index) const {
+        return slots.doubleValue(index);
+    }
 
-int ConstantPool::getType(int index)
-{
-    return constants[index].type;
-}
+    void ConstantPool::setString(unsigned int index, const std::string &str) {
+        ptrs[index] = new std::string(str);
+        constantType[index] = ConstantType::StringType;
+    }
 
-void ConstantPool::debug()
-{
-    printf("[Debug ConstanPool] ");
-    for(auto i=1;i<size;i++)
-        printf("[%d]%s ",i,constants[i].toString().c_str());
-    printf("\n");
+    std::string ConstantPool::stringValue(unsigned int index) const {
+        return *(std::string*)ptrs[index];
+    }
+
+    void ConstantPool::setClassRef(unsigned int index, class ClassRef *ref) {
+        ptrs[index] = ref;
+        constantType[index] = ConstantType::ClassRefType;
+    }
+
+    class ClassRef *ConstantPool::classRefValue(unsigned int index) const {
+        return (ClassRef*)ptrs[index];
+    }
+
+    void ConstantPool::setFieldRef(unsigned int index, class FieldRef *ref) {
+        ptrs[index] = ref;
+        constantType[index] = ConstantType::FieldRefType;
+    }
+
+    class FieldRef *ConstantPool::fieldRefValue(unsigned int index) const {
+        return (FieldRef*)ptrs[index];
+    }
+
+    void ConstantPool::setMethodRef(unsigned int index, class MethodRef *ref) {
+        ptrs[index] = ref;
+        constantType[index] = ConstantType::MethodRefType;
+    }
+
+    class MethodRef *ConstantPool::methodRefValue(unsigned int index) const {
+        return (MethodRef*)ptrs[index];
+    }
+
+    void ConstantPool::setInterfaceMemberRef(unsigned int index, class InterfaceMemberRef *ref) {
+        ptrs[index] = ref;
+        constantType[index] = ConstantType::InterfaceMemberRefType;
+    }
+
+    class InterfaceMemberRef *ConstantPool::interfaceMemberRefValue(unsigned int index) const {
+        return (InterfaceMemberRef*)ptrs[index];
+    }
+
+    void ConstantPool::setUTF8(unsigned int index, const std::string &str) {
+        ptrs[index] = new std::string(str);
+        constantType[index] = ConstantType::UTF8Type;
+    }
+
+    std::string ConstantPool::UTF8Value(unsigned int index) const {
+        return *(std::string*)ptrs[index];
+    }
+
+
+    ConstantType ConstantPool::type(unsigned int index) const {
+        return constantType[index];
+    }
+
+    void ConstantPool::dump() const {
+        for(int i = 0; i < size; i++) {
+            std::cout << "[" << i << "]";
+            switch (constantType[i]) {
+                case ConstantType::IntType: { std::cout << "(int)" << intValue(i); break;}
+                case ConstantType::LongType: { std::cout << "(long)" << longValue(i); break;}
+                case ConstantType::FloatType: { std::cout << "(float)" << floatValue(i); break;}
+                case ConstantType::DoubleType: { std::cout << "(double)" << doubleValue(i); break;}
+                case ConstantType::ClassRefType: { std::cout << "(classRef)" << classRefValue(i); break;}
+                case ConstantType::FieldRefType: { std::cout << "(fieldRef)" << fieldRefValue(i); break;}
+                case ConstantType::MethodRefType: { std::cout << "(methodRef)" << methodRefValue(i); break;}
+                case ConstantType::InterfaceMemberRefType: { std::cout << "(interfaceMemberRef)" << interfaceMemberRefValue(i); break;}
+                case ConstantType::UTF8Type: { std::cout << "(UTF8)" << UTF8Value(i); break;}
+                case ConstantType::StringType: { std::cout << "(string)" << stringValue(i); break;}
+                case ConstantType::NoneType: { std::cout << "(None)"; break;}
+            }
+            std::cout << " ";
+        }
+        std::cout << std::endl;
+    }
+
 }

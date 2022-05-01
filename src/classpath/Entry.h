@@ -2,63 +2,69 @@
 // Created by xuranus on 2/6/19.
 //
 
-#ifndef JVM_ENTRY_H
-#define JVM_ENTRY_H
+#ifndef JVM_CLASSPATH_ENTRY_H
+#define JVM_CLASSPATH_ENTRY_H
 
-#include "../classfile/basicType.h"
+#include "../basicType.h"
+#include "../classfile/BytesReader.h"
 #include <iostream>
 #include <vector>
+#include <optional>
+#include <memory>
 
-/*
+/**
  * std::pair<byte[],int> readClass(),
- * return byte array and lenth of byte,
- * if byte==0 and len==0 means no file found,
+ * return byte array and length of byte,
+ * if byte == 0 and len == 0 means no file found,
  * if bytes not null means file found,
- * if len < 0 means error occured.
+ * if len < 0 means error occurs.
+ *
  * */
 
-class Entry { //interface
-public:
-    virtual int readClass(std::string classname, byte*& data)=0;
-    virtual std::string toString()=0;
-    virtual ~Entry();
+namespace classpath {
 
-    static Entry* createEntry(std::string path);//public factory method
-    static Entry* createCompositeEntry(std::string path);
-    static Entry* createDirEntry(std::string path);
-    static Entry* createZipEntry(std::string path);
-    static Entry* createWildcardEntry(std::string path);
-};
+    class Entry {
+    private:
+        static std::unique_ptr<Entry> createWildcardEntry(const std::string& wildcardPath);
 
+    public:
+        static std::unique_ptr<Entry> createEntry(const std::string& str);
+        virtual std::optional<classfile::BytesReader> readClass(const std::string& path) = 0;
+        virtual std::string entryString() = 0;
+        virtual ~Entry() = default;
+    };
 
-struct DirEntry :public Entry{ //common dirs
-    std::string absPath; //absolute path
+    class DirEntry : public Entry { //read a common dir
+    private:
+        std::string dirPath; //absolute dir path
 
-    int readClass(std::string classname, byte*& data) override;
-    std::string toString() override;
-    explicit DirEntry(const std::string& path) ;
-};
+    public:
+        explicit DirEntry(const std::string& _dirPath);
+        std::optional<classfile::BytesReader> readClass(const std::string& path) override;
+        std::string entryString() override;
+    };
 
-struct ZipEntry :public Entry{ // *.zip ,*.jar file
-    std::string absFilePath;
+    struct ZipEntry : public Entry { // read a *.zip ,*.jar file
+    private:
+        std::string zipPath;
 
-    int readClass(std::string classname, byte*& data) override;
-    std::string toString() override;
-    explicit ZipEntry(const std::string& zipfileName);
-};
+    public:
+        explicit ZipEntry(const std::string& _zipPath);
+        std::optional<classfile::BytesReader> readClass(const std::string& path) override;
+        std::string entryString() override;
+    };
 
+    class CompositeEntry : public Entry { //read multiple directory/file separate by ";" or ":", contains wildcard(*)
+    private:
+        std::vector<std::unique_ptr<Entry>> entries;
+    public:
+        static std::string separator;
 
-struct CompositeEntry :public Entry { //multiple directory,file separator ";" or "*"
-    std::vector<Entry*> entries;
+    public:
+        explicit CompositeEntry(const std::string& paths);
+        std::optional<classfile::BytesReader> readClass(const std::string& path) override;
+        std::string entryString() override;
+    };
 
-    int readClass(std::string classname, byte*& data) override;
-    std::string toString() override;
-    explicit CompositeEntry(const std::string& paths);
-
-    ~CompositeEntry();
-};
-
-
-
-
-#endif //JVM_ENTRY_H
+}
+#endif //JVM_CLASSPATH_ENTRY_H

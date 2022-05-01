@@ -5,36 +5,49 @@
 #ifndef JVM_CLASSLOADER_H
 #define JVM_CLASSLOADER_H
 
-#include "../../classpath/ClassPath.h"
 #include "Class.h"
+#include "Object.h"
+#include "../../classpath/ClassPath.h"
+
 #include <map>
+#include <optional>
 
-struct ClassLoader {
-    std::map<std::string,Class*> classMap;
-    ClassPath* classPath;
-    bool verboseClass;
+namespace heap {
 
-    explicit ClassLoader(ClassPath* cp,bool verboseClass);
-    Class* loadClass(std::string className);
-    Class* loadNonArrayClass(std::string className);
-    Class* loadArrayClass(std::string className);
-    void loadBasicClasses();
-    void loadPrimitiveClasses();
-    void loadPrimitiveClass(std::string className);
-    Class* getPrimitiveArrayClass(u1 atype);
-    Object* createArgsArrayObject(std::vector<std::string>& args);
 
-    int readClass(std::string classname,byte*& data);
+    class ClassLoader {
+    public:
+        std::map<std::string, Class* > classMap;
+        classpath::ClassPath* classPath; // for referring, do not release
+        bool verboseClass; // if show class loading process
+        bool basicClassesLoaded;
 
-    Class* defineClass(byte* data,long length);
-    void resolveSuperClass(Class* _class); //load and resolve super class ref
-    void resolveInterfaces(Class* _class); //load and resolve interface class ref
+    public:
+        explicit ClassLoader(classpath::ClassPath *cp, bool verboseClass);
+        ~ClassLoader();
 
-    void link(Class* _class);
-    void verify(Class* _class);
-    void prepare(Class* _class);
+        Class *loadClass(const std::string& className);
+        Class* getPrimitiveArrayClass(u1 aType);
+        heap::Object *createArgsArrayObject(const std::vector<std::string> &args); // create String[] object for main()
+        std::set<Class*> classes() const;
 
-};
+    private:
+        // loadNonArrayClass [ read class file -> define -> link[verify ->  prepare]]
+        Class *loadNonArrayClass(const std::string& className);
+        Class *defineClass(classfile::BytesReader& reader); // trans classfile to heap::Class
+        void link(Class *klass); // verify() and prepare()
+        void verify(Class *klass); // verify class
+        static void prepare(Class *klass); // allocate space for static vars and initialize them
 
+        Class *loadArrayClass(const std::string& className);
+
+        void loadBasicClasses();
+
+        void loadPrimitiveClasses();
+        void loadPrimitiveClass(const std::string& className);
+    };
+
+
+}
 
 #endif //JVM_CLASSLOADER_H

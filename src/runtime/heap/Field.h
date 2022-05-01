@@ -6,20 +6,30 @@
 #define JVM_FIELD_H
 
 #include <string>
-#include "../../classfile/ClassFile.h"
-#include "ConstantPool.h"
-#include "../Slot.h"
+#include "../../classfile/Members.h"
 #include "ClassMember.h"
+#include "ConstantPool.h"
 
-struct Field: public ClassMember {
-    unsigned int slotId;
-    unsigned int constValueIndex;
+namespace heap {
+    class Class;
+    class ClassMember;
+    class ConstantPool;
 
-    Field(FieldInfo* fieldInfo,Class* classRef);
-    static std::vector<Field*> parseFields(ClassFile* classFile,Class* classRef);
-    bool isLongOrDouble();
-};
+    struct Field : public ClassMember {
+        u4 slotId;
+        u2 constValueIndex; // read constant from constant pool
 
+        Field(classfile::FieldInfo *fieldInfo, Class *_klass, ConstantPool* constantPool);
+        bool isLongOrDouble() const;
 
+        bool isEnum() const;
+        bool isVolatile() const;
+        bool isTransient() const;
+        bool isRef() const;
+
+        Class* type() const;
+    };
+
+}
 
 #endif //JVM_FIELD_H

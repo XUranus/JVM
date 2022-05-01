@@ -2,30 +2,29 @@
 // Created by xuranus on 3/16/19.
 //
 
-#ifndef JVM_NATIVEREGISTRY_H
-#define JVM_NATIVEREGISTRY_H
+#ifndef JVM_NATIVE_REGISTRY_H
+#define JVM_NATIVE_REGISTRY_H
 
 #include <map>
-#include "../runtime/Frame.h"
+#include "../runtime/thread/Frame.h"
 
-typedef void (*NativeMethod)(Frame*);
+namespace native {
 
-class NativeRegistry {
-public:
-    static NativeRegistry* instance;
-private:
-     std::map<std::string,NativeMethod> registry;
+    typedef void (*NativeMethod)(runtime::Frame *);
 
-private:
-    NativeRegistry();
+    static std::map<std::string, NativeMethod> registry;
 
-public:
-    static NativeRegistry* getNativeRegistery();
-    void init();
-    void setRegister(std::string className,std::string methodName,std::string methodDescriptor,NativeMethod method);
-    NativeMethod findNativeMethod(std::string className,std::string methodName,std::string methodDescriptor);
-    void debug();
-};
+    void initNativeRegistry();
 
+    void setRegister(const std::string& className,
+                     const std::string& methodName,
+                     const std::string& methodDescriptor,
+                     NativeMethod method);
 
-#endif //JVM_NATIVEREGISTRY_H
+    NativeMethod findNativeMethod(const std::string& className,
+                                  const std::string& methodName,
+                                  const std::string& methodDescriptor);
+
+    void emptyNativeMethod();
+}
+#endif //JVM_NATIVE_REGISTRY_H
