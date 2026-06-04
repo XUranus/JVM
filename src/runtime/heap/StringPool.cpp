@@ -9,6 +9,8 @@
 
 namespace heap::StringPool {
 
+        static std::map<std::string, heap::Object*> internedStrings;
+
         std::u16string stringToUtf16(const std::string &str) {
             std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> cvt;
             return cvt.from_bytes(str);
@@ -59,6 +61,14 @@ namespace heap::StringPool {
                 internedStrings[localStr] = jStr;
             }
             return internedStrings[localStr];
+        }
+
+        std::set<heap::Object*> allInternedStrings() {
+            std::set<heap::Object*> result;
+            for (auto& [str, obj] : internedStrings) {
+                result.insert(obj);
+            }
+            return result;
         }
 
     }

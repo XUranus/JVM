@@ -202,7 +202,7 @@ namespace instruction {
         auto v2 = frame->operandStack.popInt();
         auto v1 = frame->operandStack.popInt();
         auto s = (u4)v2 & 0x1f;
-        frame->operandStack.pushInt(int32((u4)v1 >> s));
+        frame->operandStack.pushInt(int((u4)v1 >> s));
     }
 
     void lushr::execute(runtime::Frame* frame) {
@@ -259,7 +259,7 @@ namespace instruction {
         frame->localVars.setInt(index, val);
     }
 
-    std::string iinc::verbose() {
+    std::string iinc::verbose() const {
         return name() + "\t\t" + std::to_string(index) + "\t" + std::to_string(_const);
     }
 

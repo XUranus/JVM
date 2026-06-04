@@ -52,23 +52,23 @@ namespace instruction {
     };
 
     struct invokeinterface : public Instruction {//0xB9
-        uint16 index;
+        u2 index;
         /**
          * [slotCount] : number of slot passed to method as parameter,
          * this can be directly calculated from method descriptor,
          * this exists due to historical issue, and is deprecated now
          */
-        uint8 slotsCount;
-        uint8 zero; // reserved for implementation of some JVM, must be 0
+        u1 slotsCount;
+        u1 zero; // reserved for implementation of some JVM, must be 0
 
         void fetchOperands(InstructionReader &reader) override;
         void execute(runtime::Frame* frame) override;
     };
 
     struct invokedynamic : public Instruction {//0xBA
-        uint16 index;
-        uint8 slotsCount; //must be 0
-        uint8 zero; //must be 0
+        u2 index;
+        u1 slotsCount; //must be 0
+        u1 zero; //must be 0
 
         void fetchOperands(InstructionReader &reader) override;
         void execute(runtime::Frame* frame) override;

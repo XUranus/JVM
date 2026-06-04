@@ -1,12 +1,8 @@
-//
-// Created by xuranus on 2/16/19.
-//
-
-#ifndef JVM_METHOD_H
-#define JVM_METHOD_H
+#pragma once
 
 #include <string>
 #include <vector>
+#include <memory>
 #include "ExceptionHandler.h"
 #include "../../classfile/Members.h"
 #include "ClassMember.h"
@@ -31,14 +27,13 @@ namespace heap {
         std::vector<std::string>            parameterTypeDescriptors;
         std::string                         returnTypeDescriptor;
         u4                                  argSlotCount;
-        ExceptionTable*                     exceptionTable;
+        std::unique_ptr<ExceptionTable>     exceptionTable;
         std::vector<LineNumberTableEntry>   lineNumberTable;
 
         std::vector<u1>                     parameterAnnotationData; // TODO::
         std::vector<u1>                     annotationDefaultData; // TODO::
 
-
-        static Method* ShimMethod; // Shim method
+        static std::unique_ptr<Method> ShimMethod; // Shim method
 
     private:
         void injectCodeAttribute(std::string returnType);
@@ -47,6 +42,10 @@ namespace heap {
         Method(classfile::MethodInfo *methodInfo, Class *classRef, heap::ConstantPool* constantPool);
         Method(); // todo:: for shim method
         ~Method();
+
+        // Method is movable but not copyable (due to unique_ptr<ExceptionTable>)
+        Method(Method&&) noexcept = default;
+        Method& operator=(Method&&) noexcept = default;
 
         int findExceptionHandlerPC(Class* exceptionClass, int pc);
         int lineNumber(int pc);
@@ -66,8 +65,5 @@ namespace heap {
 
         std::vector<u1> getParameterAnnotationData() const;
         std::vector<u1> getAnnotationDefaultData() const;
-
     };
 }
-
-#endif //JVM_METHOD_H

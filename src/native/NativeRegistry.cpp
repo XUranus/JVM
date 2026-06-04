@@ -30,6 +30,8 @@
 
 namespace native {
 
+    static std::map<std::string, NativeMethod> registry;
+
     void initNativeRegistry() {
         sun::misc::VM::doRegistration();
         sun::misc::Unsafe::doRegistration();
@@ -78,7 +80,7 @@ namespace native {
                  * skip registerNative()V in every class
                  * skip java/io/FileInputStream.initIDs.()V
                  */
-                return (NativeMethod) &emptyNativeMethod;
+                return reinterpret_cast<NativeMethod>(&emptyNativeMethod);
             }
         }
         return nullptr;

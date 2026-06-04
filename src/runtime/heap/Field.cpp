@@ -53,7 +53,7 @@ namespace heap {
         } else if(descriptor[0] == 'L') {
             return descriptor.substr(1, descriptor.length() - 2);
         }
-        for(auto& pair: primitiveTypes) {
+        for(auto& pair: getPrimitiveTypes()) {
             if(pair.second == descriptor) {
                 return pair.first;
             }

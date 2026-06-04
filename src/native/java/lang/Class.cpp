@@ -300,7 +300,7 @@ namespace native::java::lang {
                 methodObjs[i] = methodObj;
                 Class::jMethodSetRegister(methodObj, method);
 
-                auto shimMethod = heap::Method::ShimMethod; // shim method
+                auto* shimMethod = heap::Method::ShimMethod.get(); // shim method
                 auto shimFrame = runtime::Frame(0, 12, thread, shimMethod);
 
                 shimFrame.operandStack.pushRef(methodObj);
@@ -370,7 +370,7 @@ namespace native::java::lang {
                 fieldObjs[i] = fieldObj;
                 Class::jFieldSetRegister(fieldObj, field);
 
-                auto shimMethod = heap::Method::ShimMethod; // shim method
+                auto* shimMethod = heap::Method::ShimMethod.get(); // shim method
                 auto shimFrame = runtime::Frame(0, 8, thread, shimMethod);
 
                 shimFrame.operandStack.pushRef(fieldObj);
@@ -438,7 +438,7 @@ namespace native::java::lang {
                 constructorObjs[i] = constructorObj;
                 Class::jMethodSetRegister(constructorObj, constructor);
 
-                auto shimMethod = heap::Method::ShimMethod; // shim method
+                auto* shimMethod = heap::Method::ShimMethod.get(); // shim method
                 auto shimFrame = runtime::Frame(0, 9, thread, shimMethod);
 
                 shimFrame.operandStack.pushRef(constructorObj);

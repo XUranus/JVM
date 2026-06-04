@@ -1,33 +1,23 @@
-//
-// Created by xuranus on 2/12/19.
-//
+#pragma once
 
-#ifndef JVM_RUNTIME_SLOT_H
-#define JVM_RUNTIME_SLOT_H
-
-#include "../../src/basicType.h"
+#include "basicType.h"
 #include <vector>
-//#include "heap/Object.h"
 
-namespace heap {class Object;}
+namespace heap { class Object; }
 
 namespace runtime {
 
-    //typedef u4 Slot;
     struct Slot {
-        u4 num;
-        bool ptrFlag;
+        u4 num = 0;
+        bool ptrFlag = false;
     };
 
     class Slots {
     private:
-        u2 _size;
-        Slot *data;
+        std::vector<Slot> data;
 
     public:
-        explicit Slots(u2 _size);
-        Slots(const Slots &slots);
-        ~Slots();
+        explicit Slots(u2 size);
 
         bool isRef(int index) const;
         int size() const;
@@ -47,12 +37,11 @@ namespace runtime {
         [[nodiscard]] heap::Object* refValue(u2 index) const;
         [[nodiscard]] Slot slotValue(u2 index) const;
 
-        Slot& operator[] (u2 index) const;
-        Slots& operator=(const Slots& slots);
-        void resize(u2 _size);
+        Slot& operator[](u2 index);
+        const Slot& operator[](u2 index) const;
+        void resize(u2 newSize);
         void dump() const;
     };
-
 
     class SlotsStack {
     private:
@@ -60,14 +49,14 @@ namespace runtime {
         Slots slots;
 
     public:
-        explicit SlotsStack(u2 _capacity);;
+        explicit SlotsStack(u2 capacity);
 
         void pushInt(int v);
         int popInt();
-        void pushFloat(float v);
-        float popFloat();
         void pushLong(long v);
         long popLong();
+        void pushFloat(float v);
+        float popFloat();
         void pushDouble(double v);
         double popDouble();
         void pushBoolean(bool v);
@@ -86,5 +75,3 @@ namespace runtime {
     };
 
 }
-
-#endif //JVM_RUNTIME_SLOT_H

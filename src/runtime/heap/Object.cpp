@@ -174,17 +174,17 @@ namespace heap {
 
     char *Object::byteArray() const {
         assert(dataType == ObjectDataType::ByteArray);
-        return (int8 *) data;
+        return static_cast<char*>(data);
     }
 
     short *Object::shortArray() const {
         assert(dataType == ObjectDataType::ShortArray);
-        return (int16 *) data;
+        return static_cast<short*>(data);
     }
 
     int *Object::intArray() const {
         assert(dataType == ObjectDataType::IntArray);
-        return (int32 *) data;
+        return static_cast<int*>(data);
     }
 
     long *Object::longArray() const {

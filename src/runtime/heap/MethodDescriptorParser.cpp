@@ -1,30 +1,26 @@
-//
-// Created by xuranus on 4/26/22.
-//
-
 #include "MethodDescriptorParser.h"
-#include <cassert>
+#include "../../common/Exception.h"
 
 namespace heap {
-    MethodDescriptorParser::MethodDescriptorParser(const std::string &rawDescriptor) {
-        descriptor = rawDescriptor;
-        offset = 0;
-    }
 
-    std::pair<std::vector<std::string>, std::string>  MethodDescriptorParser::parse() {
-        // (Ljava/lang/String;IF)Ljava/lang/String; => {Ljava/lang/String, I, F}, Ljava/lang/String
-        assert(readChar() == '('); // startParams
+    MethodDescriptorParser::MethodDescriptorParser(const std::string& rawDescriptor)
+        : descriptor(rawDescriptor), offset(0) {}
+
+    std::pair<std::vector<std::string>, std::string> MethodDescriptorParser::parse() {
+        // (Ljava/lang/String;IF)Ljava/lang/String; => {Ljava/lang/String;, I, F}, Ljava/lang/String;
+        if (readChar() != '(') {
+            exception::panic("invalid method descriptor: expected '(' at start of " + descriptor);
+        }
         parseParamTypes();
-        unreadChar();
-        assert(readChar() == ')'); // endParams;
+        if (readChar() != ')') {
+            exception::panic("invalid method descriptor: expected ')' after params in " + descriptor);
+        }
         parseReturnType();
-        assert(offset == descriptor.length());
         return std::make_pair(parameterTypes, returnType);
     }
 
-
     void MethodDescriptorParser::parseParamTypes() {
-        while (true) {
+        while (offset < descriptor.size()) {
             auto t = parseFieldType();
             if (!t.empty()) {
                 parameterTypes.push_back(t);
@@ -35,53 +31,57 @@ namespace heap {
     }
 
     char MethodDescriptorParser::readChar() {
-        char b = descriptor[offset];
-        offset++;
-        return  b;
-    }
-
-    void MethodDescriptorParser::unreadChar() {
-        offset--;
+        return descriptor[offset++];
     }
 
     void MethodDescriptorParser::parseReturnType() {
-        if (readChar() == 'V') {
+        char c = descriptor[offset];
+        if (c == 'V') {
+            offset++;
             returnType = "V";
             return;
         }
-        unreadChar();
-
         auto t = parseFieldType();
-        assert(!t.empty());
+        if (t.empty()) {
+            exception::panic("invalid method descriptor: expected return type in " + descriptor);
+        }
         returnType = t;
     }
 
     std::string MethodDescriptorParser::parseFieldType() {
-        switch (readChar()) {
-            case 'B': return "B";
-            case 'C': return "C";
-            case 'D': return "D";
-            case 'F': return "F";
-            case 'I': return "I";
-            case 'J': return "J";
-            case 'S': return "S";
-            case 'Z': return "Z";
-            case 'L': return parseObjectType();
-            case '[': return parseArrayType();
-            default:  return "";
+        // Peek without consuming — only consume if we recognize the type
+        if (offset >= descriptor.size()) return "";
+        char c = descriptor[offset];
+        switch (c) {
+            case 'B': case 'C': case 'D': case 'F':
+            case 'I': case 'J': case 'S': case 'Z':
+                offset++;
+                return std::string(1, c);
+            case 'L':
+                offset++;
+                return parseObjectType();
+            case '[':
+                offset++;
+                return parseArrayType();
+            default:
+                return ""; // not a field type, don't consume
         }
     }
 
     std::string MethodDescriptorParser::parseObjectType() {
-        std::string unread = descriptor.substr(offset);
-        auto semicolonIndex = unread.find(';');
-        assert(semicolonIndex != std::string::npos);
-        int start = offset - 1;
-        offset = offset + semicolonIndex + 1;
-        return descriptor.substr(start, semicolonIndex + 2);
+        // offset points past 'L', scan for ';'
+        auto semicolonIndex = descriptor.find(';', offset);
+        if (semicolonIndex == std::string::npos) {
+            exception::panic("invalid method descriptor: unterminated object type in " + descriptor);
+        }
+        int start = offset - 1; // include 'L'
+        int len = static_cast<int>(semicolonIndex) - start + 1; // include ';'
+        offset = semicolonIndex + 1;
+        return descriptor.substr(start, len);
     }
 
     std::string MethodDescriptorParser::parseArrayType() {
+        // offset points past '[', parse the element type
         auto arrStart = offset - 1;
         parseFieldType();
         return descriptor.substr(arrStart, offset - arrStart);

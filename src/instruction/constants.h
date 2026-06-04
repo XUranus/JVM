@@ -75,15 +75,15 @@ namespace instruction {
     };
 
     struct bipush : public Instruction {//0x10
-        int8 val;
+        int8_t val;
 
         void fetchOperands(InstructionReader &reader) override;
         void execute(runtime::Frame* frame) override;
-        std::string verbose() override;
+        [[nodiscard]] std::string verbose() const override;
     };
 
     struct sipush : public Instruction {//0x11
-        int16 val;
+        int16_t val;
 
         void fetchOperands(InstructionReader &reader) override;
         void execute(runtime::Frame* frame) override;

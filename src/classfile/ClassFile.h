@@ -32,7 +32,7 @@ namespace classfile {
         u2 superClass;
 
         u2 interfaceCount;
-        u2* interfaces;// [interfaceCount];
+        std::vector<u2> interfaces;
 
         u2 fieldCount;
         std::vector<std::unique_ptr<FieldInfo>> fields; // [fieldsCount]

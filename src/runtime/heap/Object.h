@@ -12,10 +12,10 @@
 namespace heap {
 
     enum ObjectDataType: unsigned char {
-        BoolArray = 1, ByteArray = 2,  // int8[]
-        ShortArray = 3, CharArray = 4, // int16[]
-        IntArray = 5,  // int32[]
-        LongArray = 6, // int64[]
+        BoolArray = 1, ByteArray = 2,  // char[]
+        ShortArray = 3, CharArray = 4, // short[]
+        IntArray = 5,  // int[]
+        LongArray = 6, // long[]
         FloatArray = 7, // float32[]
         DoubleArray = 8, //float64[]
         ObjectRefArray = 9, //Object*[]

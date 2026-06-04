@@ -26,33 +26,33 @@ namespace instruction {
         return pc;
     }
 
-    int8 InstructionReader::readInt8() {
-        int8 ret = *(int8 *) (&code[pc]);
+    int8_t InstructionReader::readInt8() {
+        int8_t ret = *(int8_t *) (&code[pc]);
         pc++;
         return ret;
     }
 
-    uint8 InstructionReader::readUint8() {
-        uint8 ret = code[pc];
+    u1 InstructionReader::readUint8() {
+        u1 ret = code[pc];
         pc++;
         return ret;
     }
 
-    int16 InstructionReader::readInt16() {
-        return int16(readUint16());
+    int16_t InstructionReader::readInt16() {
+        return int16_t(readUint16());
     }
 
-    uint16 InstructionReader::readUint16() {
-        auto byte1 = (uint16) readUint8();
-        auto byte2 = (uint16) readUint8();
+    u2 InstructionReader::readUint16() {
+        auto byte1 = (u2) readUint8();
+        auto byte2 = (u2) readUint8();
         return (byte1 << 8) | byte2;
     }
 
-    int32 InstructionReader::readInt32() {
-        auto byte1 = (int32) readUint8();
-        auto byte2 = (int32) readUint8();
-        auto byte3 = (int32) readUint8();
-        auto byte4 = (int32) readUint8();
+    int InstructionReader::readInt32() {
+        auto byte1 = (int) readUint8();
+        auto byte2 = (int) readUint8();
+        auto byte3 = (int) readUint8();
+        auto byte4 = (int) readUint8();
         return (byte1 << 24) | (byte2 << 16) | (byte3 << 8) | byte4;
     }
 
@@ -60,8 +60,8 @@ namespace instruction {
         while (pc % 4 != 0) pc++;
     }
 
-    std::vector<int32> InstructionReader::readInt32s(int jumpOffsetsCount) {
-        std::vector<int32> jumpOffsets(jumpOffsetsCount, 0);
+    std::vector<int> InstructionReader::readInt32s(int jumpOffsetsCount) {
+        std::vector<int> jumpOffsets(jumpOffsetsCount, 0);
         for (int i = 0; i < jumpOffsetsCount; i++) {
             jumpOffsets[i] = readInt32();
         }

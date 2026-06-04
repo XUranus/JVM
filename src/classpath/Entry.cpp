@@ -11,10 +11,10 @@
 
 namespace classpath {
 
-#if defined(__linux__) || defined(__unix__)
+#ifdef _WIN32
     std::string CompositeEntry::separator = ";";
 #else
-    std::string CompositeEntry::separator = ";";
+    std::string CompositeEntry::separator = ":";
 #endif
 
     std::unique_ptr<Entry> Entry::createEntry(const std::string &str) {
@@ -37,15 +37,15 @@ namespace classpath {
         std::string paths;
         dirNames.emplace_back("");//current dir
         for (const auto &dirName: dirNames) {
-            paths += FilePath::join(absPath, dirName) + ";";
+            paths += FilePath::join(absPath, dirName) + CompositeEntry::separator;
         }
         // add jar and zip
         auto zipNames = FilePath::listZip(absPath);
         for (const auto &zipName: zipNames) {
-            paths += FilePath::join(absPath, zipName) + ";";
+            paths += FilePath::join(absPath, zipName) + CompositeEntry::separator;
         }
 
-        return createEntry(paths.substr(0, paths.length() - 1));//remove ;
+        return createEntry(paths.substr(0, paths.length() - CompositeEntry::separator.length()));
     }
 
 
@@ -72,7 +72,7 @@ namespace classpath {
 
     CompositeEntry::CompositeEntry(const std::string& pathsStr) {
         entries.clear();
-        auto paths = FilePath::split(pathsStr, ";");
+        auto paths = FilePath::split(pathsStr, CompositeEntry::separator);
         for (auto &path: paths) {
             entries.push_back(createEntry(path));
         }
@@ -109,8 +109,8 @@ namespace classpath {
     //libZip ,documentation: https://libzip.org/documentation
     std::optional<classfile::BytesReader> ZipEntry::readClass(const std::string &path) {
         auto res = classfile::GZipPool::readGzip(zipPath, path);
-        if(res) {
-            return classfile::BytesReader(res->second, res->first, zipPath);
+        if (res) {
+            return classfile::BytesReader(std::move(*res), zipPath);
         } else {
             return std::nullopt;
         }

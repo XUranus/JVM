@@ -57,7 +57,7 @@ namespace native::sun::reflect::NativeConstructorAccessorImpl {
         frame->operandStack.pushRef(obj);
 
         // call <init>
-        auto shimMethod = heap::Method::ShimMethod; // shim method
+        auto* shimMethod = heap::Method::ShimMethod.get(); // shim method
         auto shimFrame = runtime::Frame(0, (int )constructor->argSlotCount, thread, shimMethod);
         thread->stack->push(shimFrame);
 

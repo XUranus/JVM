@@ -123,12 +123,36 @@ namespace native::java::lang::System {
                 {"java.class.version",   "52.0"},
                 {"java.class.path",      "todo"},
                 {"java.awt.graphicsenv", "sun.awt.CGraphicsEnvironment"},
-                {"os.name",              "linux"},   		  // todo
-                {"os.arch",              "amd64"}, 			  // todo
-                {"os.version",           ""},             // todo
-                {"file.separator",       "/"},            // todo os.PathSeparator
-                {"path.separator",       ":"},            // todo os.PathListSeparator
-                {"line.separator",       "\n"},           // todo
+#ifdef _WIN32
+                {"os.name",              "windows"},
+#elif defined(__APPLE__)
+                {"os.name",              "mac os x"},
+#else
+                {"os.name",              "linux"},
+#endif
+#if defined(__x86_64__) || defined(_M_X64)
+                {"os.arch",              "amd64"},
+#elif defined(__aarch64__) || defined(_M_ARM64)
+                {"os.arch",              "aarch64"},
+#else
+                {"os.arch",              "x86"},
+#endif
+                {"os.version",           ""},
+#ifdef _WIN32
+                {"file.separator",       "\\"},
+#else
+                {"file.separator",       "/"},
+#endif
+#ifdef _WIN32
+                {"path.separator",       ";"},
+#else
+                {"path.separator",       ":"},
+#endif
+#ifdef _WIN32
+                {"line.separator",       "\r\n"},
+#else
+                {"line.separator",       "\n"},
+#endif
                 {"user.name",            ""},             // todo
                 {"user.home",            ""},             // todo
                 {"user.dir",             "."},            // todo
@@ -155,7 +179,7 @@ namespace native::java::lang::System {
             heap::Object* jKey = heap::StringPool::JString(classLoader, key);
             heap::Object* jValue = heap::StringPool::JString(classLoader, value);
 
-            auto shimMethod = heap::Method::ShimMethod; // shim method
+            auto* shimMethod = heap::Method::ShimMethod.get(); // shim method
             auto shimFrame = runtime::Frame(0, 3, thread, shimMethod);
 
             shimFrame.operandStack.pushRef(props);

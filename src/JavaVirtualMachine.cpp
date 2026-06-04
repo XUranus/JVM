@@ -70,7 +70,7 @@ void JavaVirtualMachine::interpret(runtime::Thread *thread) const {
         reader.reset(frame.method->code.data(), pc, frame.method->code.size());
         u1 opCode = reader.readUint8();
 
-        instruction::Instruction* inst = instruction::create(opCode);
+        auto inst = instruction::create(opCode);
         inst->fetchOperands(reader);
 
         if (cmd.verboseInstFlag) {
@@ -130,8 +130,8 @@ std::set<heap::Object *> JavaVirtualMachine::collectGCRoots() const {
     // 4. objects referred by native method
     // TODO::
     // interned string
-    for(auto& pair: heap::StringPool::internedStrings) {
-        res.insert(pair.second);
+    for(auto* obj: heap::StringPool::allInternedStrings()) {
+        res.insert(obj);
     }
 
     return res;

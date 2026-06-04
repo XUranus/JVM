@@ -23,23 +23,23 @@
 
 namespace instruction {
 
-    std::string Instruction::verbose() {
+    std::string Instruction::verbose() const {
         return name();
     }
 
     void NoOperandsInstruction::fetchOperands(InstructionReader &reader) {}
 
-    std::string NoOperandsInstruction::verbose(){
+    std::string NoOperandsInstruction::verbose() const {
         return name();
     }
 
 
 
     void BranchInstructions::fetchOperands(InstructionReader &reader) {
-        offset = (int)reader.readInt16();
+        offset = static_cast<int>(reader.readInt16());
     }
 
-    std::string BranchInstructions::verbose() {
+    std::string BranchInstructions::verbose() const {
         return name() + "\t\t" + std::to_string(offset);
     }
 
@@ -49,7 +49,7 @@ namespace instruction {
         index = reader.readUint8();
     }
 
-    std::string Index8Instruction::verbose() {
+    std::string Index8Instruction::verbose() const {
         return name() + " \t\t" + std::to_string(index);
     }
 
@@ -59,7 +59,7 @@ namespace instruction {
         index = reader.readUint16();
     }
 
-    std::string Index16Instruction::verbose() {
+    std::string Index16Instruction::verbose() const {
         return name() + " \t\t" + std::to_string(index);
     }
 
@@ -277,214 +277,214 @@ namespace instruction {
         }
     }
 
-    Instruction* create(u1 _opCode) {
-        Instruction* ins = nullptr;
+    std::unique_ptr<Instruction> create(u1 _opCode) {
+        std::unique_ptr<Instruction> ins;
         switch (_opCode) {
-            case 0x00:{ ins = new nop();ins->opCode = _opCode;break;}
-            case 0x01:{ ins = new aconst_null();ins->opCode = _opCode;break;}
-            case 0x02:{ ins = new iconst_m1();ins->opCode = _opCode;break;}
-            case 0x03:{ ins = new iconst_0();ins->opCode = _opCode;break;}
-            case 0x04:{ ins = new iconst_1();ins->opCode = _opCode;break;}
-            case 0x05:{ ins = new iconst_2();ins->opCode = _opCode;break;}
-            case 0x06:{ ins = new iconst_3();ins->opCode = _opCode;break;}
-            case 0x07:{ ins = new iconst_4();ins->opCode = _opCode;break;}
-            case 0x08:{ ins = new iconst_5();ins->opCode = _opCode;break;}
-            case 0x09:{ ins = new lconst_0();ins->opCode = _opCode;break;}
-            case 0x0A:{ ins = new lconst_1();ins->opCode = _opCode;break;}
-            case 0x0B:{ ins = new fconst_0();ins->opCode = _opCode;break;}
-            case 0x0C:{ ins = new fconst_1();ins->opCode = _opCode;break;}
-            case 0x0D:{ ins = new fconst_2();ins->opCode = _opCode;break;}
-            case 0x0E:{ ins = new dconst_0();ins->opCode = _opCode;break;}
-            case 0x0F:{ ins = new dconst_1();ins->opCode = _opCode;break;}
-            case 0x10:{ ins = new bipush();ins->opCode = _opCode;break;}
-            case 0x11:{ ins = new sipush();ins->opCode = _opCode;break;}
-            case 0x12:{ ins = new ldc();ins->opCode = _opCode;break;}
-            case 0x13:{ ins = new ldc_w();ins->opCode = _opCode;break;}
-            case 0x14:{ ins = new ldc2_w();ins->opCode = _opCode;break;}
-            case 0x15:{ ins = new iload();ins->opCode = _opCode;break;}
-            case 0x16:{ ins = new lload();ins->opCode = _opCode;break;}
-            case 0x17:{ ins = new fload();ins->opCode = _opCode;break;}
-            case 0x18:{ ins = new dload();ins->opCode = _opCode;break;}
-            case 0x19:{ ins = new aload();ins->opCode = _opCode;break;}
-            case 0x1A:{ ins = new iload_0();ins->opCode = _opCode;break;}
-            case 0x1B:{ ins = new iload_1();ins->opCode = _opCode;break;}
-            case 0x1C:{ ins = new iload_2();ins->opCode = _opCode;break;}
-            case 0x1D:{ ins = new iload_3();ins->opCode = _opCode;break;}
-            case 0x1E:{ ins = new lload_0();ins->opCode = _opCode;break;}
-            case 0x1F:{ ins = new lload_1();ins->opCode = _opCode;break;}
-            case 0x20:{ ins = new lload_2();ins->opCode = _opCode;break;}
-            case 0x21:{ ins = new lload_3();ins->opCode = _opCode;break;}
-            case 0x22:{ ins = new fload_0();ins->opCode = _opCode;break;}
-            case 0x23:{ ins = new fload_1();ins->opCode = _opCode;break;}
-            case 0x24:{ ins = new fload_2();ins->opCode = _opCode;break;}
-            case 0x25:{ ins = new fload_3();ins->opCode = _opCode;break;}
-            case 0x26:{ ins = new dload_0();ins->opCode = _opCode;break;}
-            case 0x27:{ ins = new dload_1();ins->opCode = _opCode;break;}
-            case 0x28:{ ins = new dload_2();ins->opCode = _opCode;break;}
-            case 0x29:{ ins = new dload_3();ins->opCode = _opCode;break;}
-            case 0x2A:{ ins = new aload_0();ins->opCode = _opCode;break;}
-            case 0x2B:{ ins = new aload_1();ins->opCode = _opCode;break;}
-            case 0x2C:{ ins = new aload_2();ins->opCode = _opCode;break;}
-            case 0x2D:{ ins = new aload_3();ins->opCode = _opCode;break;}
-            case 0x2E:{ ins = new iaload();ins->opCode = _opCode;break;}
-            case 0x2F:{ ins = new laload();ins->opCode = _opCode;break;}
-            case 0x30:{ ins = new faload();ins->opCode = _opCode;break;}
-            case 0x31:{ ins = new daload();ins->opCode = _opCode;break;}
-            case 0x32:{ ins = new aaload();ins->opCode = _opCode;break;}
-            case 0x33:{ ins = new baload();ins->opCode = _opCode;break;}
-            case 0x34:{ ins = new caload();ins->opCode = _opCode;break;}
-            case 0x35:{ ins = new saload();ins->opCode = _opCode;break;}
-            case 0x36:{ ins = new istore();ins->opCode = _opCode;break;}
-            case 0x37:{ ins = new lstore();ins->opCode = _opCode;break;}
-            case 0x38:{ ins = new fstore();ins->opCode = _opCode;break;}
-            case 0x39:{ ins = new dstore();ins->opCode = _opCode;break;}
-            case 0x3A:{ ins = new astore();ins->opCode = _opCode;break;}
-            case 0x3B:{ ins = new istore_0();ins->opCode = _opCode;break;}
-            case 0x3C:{ ins = new istore_1();ins->opCode = _opCode;break;}
-            case 0x3D:{ ins = new istore_2();ins->opCode = _opCode;break;}
-            case 0x3E:{ ins = new istore_3();ins->opCode = _opCode;break;}
-            case 0x3F:{ ins = new lstore_0();ins->opCode = _opCode;break;}
-            case 0x40:{ ins = new lstore_1();ins->opCode = _opCode;break;}
-            case 0x41:{ ins = new lstore_2();ins->opCode = _opCode;break;}
-            case 0x42:{ ins = new lstore_3();ins->opCode = _opCode;break;}
-            case 0x43:{ ins = new fstore_0();ins->opCode = _opCode;break;}
-            case 0x44:{ ins = new fstore_1();ins->opCode = _opCode;break;}
-            case 0x45:{ ins = new fstore_2();ins->opCode = _opCode;break;}
-            case 0x46:{ ins = new fstore_3();ins->opCode = _opCode;break;}
-            case 0x47:{ ins = new dstore_0();ins->opCode = _opCode;break;}
-            case 0x48:{ ins = new dstore_1();ins->opCode = _opCode;break;}
-            case 0x49:{ ins = new dstore_2();ins->opCode = _opCode;break;}
-            case 0x4A:{ ins = new dstore_3();ins->opCode = _opCode;break;}
-            case 0x4B:{ ins = new astore_0();ins->opCode = _opCode;break;}
-            case 0x4C:{ ins = new astore_1();ins->opCode = _opCode;break;}
-            case 0x4D:{ ins = new astore_2();ins->opCode = _opCode;break;}
-            case 0x4E:{ ins = new astore_3();ins->opCode = _opCode;break;}
-            case 0x4F:{ ins = new iastore();ins->opCode = _opCode;break;}
-            case 0x50:{ ins = new lastore();ins->opCode = _opCode;break;}
-            case 0x51:{ ins = new fastore();ins->opCode = _opCode;break;}
-            case 0x52:{ ins = new dastore();ins->opCode = _opCode;break;}
-            case 0x53:{ ins = new aastore();ins->opCode = _opCode;break;}
-            case 0x54:{ ins = new bastore();ins->opCode = _opCode;break;}
-            case 0x55:{ ins = new castore();ins->opCode = _opCode;break;}
-            case 0x56:{ ins = new sastore();ins->opCode = _opCode;break;}
-            case 0x57:{ ins = new pop();ins->opCode = _opCode;break;}
-            case 0x58:{ ins = new pop2();ins->opCode = _opCode;break;}
-            case 0x59:{ ins = new dup();ins->opCode = _opCode;break;}
-            case 0x5A:{ ins = new dup_x1();ins->opCode = _opCode;break;}
-            case 0x5B:{ ins = new dup_x2();ins->opCode = _opCode;break;}
-            case 0x5C:{ ins = new dup2();ins->opCode = _opCode;break;}
-            case 0x5D:{ ins = new dup2_x1();ins->opCode = _opCode;break;}
-            case 0x5E:{ ins = new dup2_x2();ins->opCode = _opCode;break;}
-            case 0x5F:{ ins = new swap();ins->opCode = _opCode;break;}
-            case 0x60:{ ins = new iadd();ins->opCode = _opCode;break;}
-            case 0x61:{ ins = new ladd();ins->opCode = _opCode;break;}
-            case 0x62:{ ins = new fadd();ins->opCode = _opCode;break;}
-            case 0x63:{ ins = new dadd();ins->opCode = _opCode;break;}
-            case 0x64:{ ins = new isub();ins->opCode = _opCode;break;}
-            case 0x65:{ ins = new lsub();ins->opCode = _opCode;break;}
-            case 0x66:{ ins = new fsub();ins->opCode = _opCode;break;}
-            case 0x67:{ ins = new dsub();ins->opCode = _opCode;break;}
-            case 0x68:{ ins = new imul();ins->opCode = _opCode;break;}
-            case 0x69:{ ins = new lmul();ins->opCode = _opCode;break;}
-            case 0x6A:{ ins = new fmul();ins->opCode = _opCode;break;}
-            case 0x6B:{ ins = new dmul();ins->opCode = _opCode;break;}
-            case 0x6C:{ ins = new idiv();ins->opCode = _opCode;break;}
-            case 0x6D:{ ins = new ldiv_();ins->opCode = _opCode;break;}
-            case 0x6E:{ ins = new fdiv();ins->opCode = _opCode;break;}
-            case 0x6F:{ ins = new ddiv();ins->opCode = _opCode;break;}
-            case 0x70:{ ins = new irem();ins->opCode = _opCode;break;}
-            case 0x71:{ ins = new lrem();ins->opCode = _opCode;break;}
-            case 0x72:{ ins = new frem();ins->opCode = _opCode;break;}
-            case 0x73:{ ins = new drem();ins->opCode = _opCode;break;}
-            case 0x74:{ ins = new ineg();ins->opCode = _opCode;break;}
-            case 0x75:{ ins = new lneg();ins->opCode = _opCode;break;}
-            case 0x76:{ ins = new fneg();ins->opCode = _opCode;break;}
-            case 0x77:{ ins = new dneg();ins->opCode = _opCode;break;}
-            case 0x78:{ ins = new ishl();ins->opCode = _opCode;break;}
-            case 0x79:{ ins = new lshl();ins->opCode = _opCode;break;}
-            case 0x7A:{ ins = new ishr();ins->opCode = _opCode;break;}
-            case 0x7B:{ ins = new lshr();ins->opCode = _opCode;break;}
-            case 0x7C:{ ins = new iushr();ins->opCode = _opCode;break;}
-            case 0x7D:{ ins = new lushr();ins->opCode = _opCode;break;}
-            case 0x7E:{ ins = new iand();ins->opCode = _opCode;break;}
-            case 0x7F:{ ins = new land();ins->opCode = _opCode;break;}
-            case 0x80:{ ins = new ior();ins->opCode = _opCode;break;}
-            case 0x81:{ ins = new lor();ins->opCode = _opCode;break;}
-            case 0x82:{ ins = new ixor();ins->opCode = _opCode;break;}
-            case 0x83:{ ins = new lxor();ins->opCode = _opCode;break;}
-            case 0x84:{ ins = new iinc();ins->opCode = _opCode;break;}
-            case 0x85:{ ins = new i2l();ins->opCode = _opCode;break;}
-            case 0x86:{ ins = new i2f();ins->opCode = _opCode;break;}
-            case 0x87:{ ins = new i2d();ins->opCode = _opCode;break;}
-            case 0x88:{ ins = new l2i();ins->opCode = _opCode;break;}
-            case 0x89:{ ins = new l2f();ins->opCode = _opCode;break;}
-            case 0x8A:{ ins = new l2d();ins->opCode = _opCode;break;}
-            case 0x8B:{ ins = new f2i();ins->opCode = _opCode;break;}
-            case 0x8C:{ ins = new f2l();ins->opCode = _opCode;break;}
-            case 0x8D:{ ins = new f2d();ins->opCode = _opCode;break;}
-            case 0x8E:{ ins = new d2i();ins->opCode = _opCode;break;}
-            case 0x8F:{ ins = new d2l();ins->opCode = _opCode;break;}
-            case 0x90:{ ins = new d2f();ins->opCode = _opCode;break;}
-            case 0x91:{ ins = new i2b();ins->opCode = _opCode;break;}
-            case 0x92:{ ins = new i2c();ins->opCode = _opCode;break;}
-            case 0x93:{ ins = new i2s();ins->opCode = _opCode;break;}
-            case 0x94:{ ins = new lcmp();ins->opCode = _opCode;break;}
-            case 0x95:{ ins = new fcmpl();ins->opCode = _opCode;break;}
-            case 0x96:{ ins = new fcmpg();ins->opCode = _opCode;break;}
-            case 0x97:{ ins = new dcmpl();ins->opCode = _opCode;break;}
-            case 0x98:{ ins = new dcmpg();ins->opCode = _opCode;break;}
-            case 0x99:{ ins = new ifeq();ins->opCode = _opCode;break;}
-            case 0x9A:{ ins = new ifne();ins->opCode = _opCode;break;}
-            case 0x9B:{ ins = new iflt();ins->opCode = _opCode;break;}
-            case 0x9C:{ ins = new ifge();ins->opCode = _opCode;break;}
-            case 0x9D:{ ins = new ifgt();ins->opCode = _opCode;break;}
-            case 0x9E:{ ins = new ifle();ins->opCode = _opCode;break;}
-            case 0x9F:{ ins = new if_icmpeq();ins->opCode = _opCode;break;}
-            case 0xA0:{ ins = new if_icmpne();ins->opCode = _opCode;break;}
-            case 0xA1:{ ins = new if_icmplt();ins->opCode = _opCode;break;}
-            case 0xA2:{ ins = new if_icmpge();ins->opCode = _opCode;break;}
-            case 0xA3:{ ins = new if_icmpgt();ins->opCode = _opCode;break;}
-            case 0xA4:{ ins = new if_icmple();ins->opCode = _opCode;break;}
-            case 0xA5:{ ins = new if_acmpeq();ins->opCode = _opCode;break;}
-            case 0xA6:{ ins = new if_acmpne();ins->opCode = _opCode;break;}
-            case 0xA7:{ ins = new goto_();ins->opCode = _opCode;break;}
-            case 0xA8:{ ins = new jsr();ins->opCode = _opCode;break;}
-            case 0xA9:{ ins = new ret();ins->opCode = _opCode;break;}
-            case 0xAA:{ ins = new tableswitch();ins->opCode = _opCode;break;}
-            case 0xAB:{ ins = new lookupswitch();ins->opCode = _opCode;break;}
-            case 0xAC:{ ins = new ireturn();ins->opCode = _opCode;break;}
-            case 0xAD:{ ins = new lreturn();ins->opCode = _opCode;break;}
-            case 0xAE:{ ins = new freturn();ins->opCode = _opCode;break;}
-            case 0xAF:{ ins = new dreturn();ins->opCode = _opCode;break;}
-            case 0xB0:{ ins = new areturn();ins->opCode = _opCode;break;}
-            case 0xB1:{ ins = new return_();ins->opCode = _opCode;break;}
-            case 0xB2:{ ins = new getstatic();ins->opCode = _opCode;break;}
-            case 0xB3:{ ins = new putstatic();ins->opCode = _opCode;break;}
-            case 0xB4:{ ins = new getfield();ins->opCode = _opCode;break;}
-            case 0xB5:{ ins = new putfield();ins->opCode = _opCode;break;}
-            case 0xB6:{ ins = new invokevirtual();ins->opCode = _opCode;break;}
-            case 0xB7:{ ins = new invokespecial();ins->opCode = _opCode;break;}
-            case 0xB8:{ ins = new invokestatic();ins->opCode = _opCode;break;}
-            case 0xB9:{ ins = new invokeinterface();ins->opCode = _opCode;break;}
-            case 0xBA:{ ins = new invokedynamic();ins->opCode = _opCode;break;}
-            case 0xBB:{ ins = new new_();ins->opCode = _opCode;break;}
-            case 0xBC:{ ins = new newarray();ins->opCode = _opCode;break;}
-            case 0xBD:{ ins = new anewarray();ins->opCode = _opCode;break;}
-            case 0xBE:{ ins = new arraylength();ins->opCode = _opCode;break;}
-            case 0xBF:{ ins = new athrow();ins->opCode = _opCode;break;}
-            case 0xC0:{ ins = new checkcast();ins->opCode = _opCode;break;}
-            case 0xC1:{ ins = new instanceof();ins->opCode = _opCode;break;}
-            case 0xC2:{ ins = new monitorenter();ins->opCode = _opCode;break;}
-            case 0xC3:{ ins = new monitiorexit();ins->opCode = _opCode;break;}
-            case 0xC4:{ ins = new wide();ins->opCode = _opCode;break;}
-            case 0xC5:{ ins = new multianewarray();ins->opCode = _opCode;break;}
-            case 0xC6:{ ins = new ifnull();ins->opCode = _opCode;break;}
-            case 0xC7:{ ins = new ifnonnull();ins->opCode = _opCode;break;}
-            case 0xC8:{ ins = new goto_w();ins->opCode = _opCode;break;}
-            case 0xC9:{ ins = new jsr_w();ins->opCode = _opCode;break;}
-            case 0xCA:{ ins = new breakpoint();ins->opCode = _opCode;break;}
-            case 0xFE:{ ins = new impdep1();ins->opCode = _opCode;break;}
-            case 0xFF:{ ins = new impdep2();ins->opCode = _opCode;break;}
+            case 0x00:{ ins = std::make_unique<nop>();ins->opCode = _opCode;break;}
+            case 0x01:{ ins = std::make_unique<aconst_null>();ins->opCode = _opCode;break;}
+            case 0x02:{ ins = std::make_unique<iconst_m1>();ins->opCode = _opCode;break;}
+            case 0x03:{ ins = std::make_unique<iconst_0>();ins->opCode = _opCode;break;}
+            case 0x04:{ ins = std::make_unique<iconst_1>();ins->opCode = _opCode;break;}
+            case 0x05:{ ins = std::make_unique<iconst_2>();ins->opCode = _opCode;break;}
+            case 0x06:{ ins = std::make_unique<iconst_3>();ins->opCode = _opCode;break;}
+            case 0x07:{ ins = std::make_unique<iconst_4>();ins->opCode = _opCode;break;}
+            case 0x08:{ ins = std::make_unique<iconst_5>();ins->opCode = _opCode;break;}
+            case 0x09:{ ins = std::make_unique<lconst_0>();ins->opCode = _opCode;break;}
+            case 0x0A:{ ins = std::make_unique<lconst_1>();ins->opCode = _opCode;break;}
+            case 0x0B:{ ins = std::make_unique<fconst_0>();ins->opCode = _opCode;break;}
+            case 0x0C:{ ins = std::make_unique<fconst_1>();ins->opCode = _opCode;break;}
+            case 0x0D:{ ins = std::make_unique<fconst_2>();ins->opCode = _opCode;break;}
+            case 0x0E:{ ins = std::make_unique<dconst_0>();ins->opCode = _opCode;break;}
+            case 0x0F:{ ins = std::make_unique<dconst_1>();ins->opCode = _opCode;break;}
+            case 0x10:{ ins = std::make_unique<bipush>();ins->opCode = _opCode;break;}
+            case 0x11:{ ins = std::make_unique<sipush>();ins->opCode = _opCode;break;}
+            case 0x12:{ ins = std::make_unique<ldc>();ins->opCode = _opCode;break;}
+            case 0x13:{ ins = std::make_unique<ldc_w>();ins->opCode = _opCode;break;}
+            case 0x14:{ ins = std::make_unique<ldc2_w>();ins->opCode = _opCode;break;}
+            case 0x15:{ ins = std::make_unique<iload>();ins->opCode = _opCode;break;}
+            case 0x16:{ ins = std::make_unique<lload>();ins->opCode = _opCode;break;}
+            case 0x17:{ ins = std::make_unique<fload>();ins->opCode = _opCode;break;}
+            case 0x18:{ ins = std::make_unique<dload>();ins->opCode = _opCode;break;}
+            case 0x19:{ ins = std::make_unique<aload>();ins->opCode = _opCode;break;}
+            case 0x1A:{ ins = std::make_unique<iload_0>();ins->opCode = _opCode;break;}
+            case 0x1B:{ ins = std::make_unique<iload_1>();ins->opCode = _opCode;break;}
+            case 0x1C:{ ins = std::make_unique<iload_2>();ins->opCode = _opCode;break;}
+            case 0x1D:{ ins = std::make_unique<iload_3>();ins->opCode = _opCode;break;}
+            case 0x1E:{ ins = std::make_unique<lload_0>();ins->opCode = _opCode;break;}
+            case 0x1F:{ ins = std::make_unique<lload_1>();ins->opCode = _opCode;break;}
+            case 0x20:{ ins = std::make_unique<lload_2>();ins->opCode = _opCode;break;}
+            case 0x21:{ ins = std::make_unique<lload_3>();ins->opCode = _opCode;break;}
+            case 0x22:{ ins = std::make_unique<fload_0>();ins->opCode = _opCode;break;}
+            case 0x23:{ ins = std::make_unique<fload_1>();ins->opCode = _opCode;break;}
+            case 0x24:{ ins = std::make_unique<fload_2>();ins->opCode = _opCode;break;}
+            case 0x25:{ ins = std::make_unique<fload_3>();ins->opCode = _opCode;break;}
+            case 0x26:{ ins = std::make_unique<dload_0>();ins->opCode = _opCode;break;}
+            case 0x27:{ ins = std::make_unique<dload_1>();ins->opCode = _opCode;break;}
+            case 0x28:{ ins = std::make_unique<dload_2>();ins->opCode = _opCode;break;}
+            case 0x29:{ ins = std::make_unique<dload_3>();ins->opCode = _opCode;break;}
+            case 0x2A:{ ins = std::make_unique<aload_0>();ins->opCode = _opCode;break;}
+            case 0x2B:{ ins = std::make_unique<aload_1>();ins->opCode = _opCode;break;}
+            case 0x2C:{ ins = std::make_unique<aload_2>();ins->opCode = _opCode;break;}
+            case 0x2D:{ ins = std::make_unique<aload_3>();ins->opCode = _opCode;break;}
+            case 0x2E:{ ins = std::make_unique<iaload>();ins->opCode = _opCode;break;}
+            case 0x2F:{ ins = std::make_unique<laload>();ins->opCode = _opCode;break;}
+            case 0x30:{ ins = std::make_unique<faload>();ins->opCode = _opCode;break;}
+            case 0x31:{ ins = std::make_unique<daload>();ins->opCode = _opCode;break;}
+            case 0x32:{ ins = std::make_unique<aaload>();ins->opCode = _opCode;break;}
+            case 0x33:{ ins = std::make_unique<baload>();ins->opCode = _opCode;break;}
+            case 0x34:{ ins = std::make_unique<caload>();ins->opCode = _opCode;break;}
+            case 0x35:{ ins = std::make_unique<saload>();ins->opCode = _opCode;break;}
+            case 0x36:{ ins = std::make_unique<istore>();ins->opCode = _opCode;break;}
+            case 0x37:{ ins = std::make_unique<lstore>();ins->opCode = _opCode;break;}
+            case 0x38:{ ins = std::make_unique<fstore>();ins->opCode = _opCode;break;}
+            case 0x39:{ ins = std::make_unique<dstore>();ins->opCode = _opCode;break;}
+            case 0x3A:{ ins = std::make_unique<astore>();ins->opCode = _opCode;break;}
+            case 0x3B:{ ins = std::make_unique<istore_0>();ins->opCode = _opCode;break;}
+            case 0x3C:{ ins = std::make_unique<istore_1>();ins->opCode = _opCode;break;}
+            case 0x3D:{ ins = std::make_unique<istore_2>();ins->opCode = _opCode;break;}
+            case 0x3E:{ ins = std::make_unique<istore_3>();ins->opCode = _opCode;break;}
+            case 0x3F:{ ins = std::make_unique<lstore_0>();ins->opCode = _opCode;break;}
+            case 0x40:{ ins = std::make_unique<lstore_1>();ins->opCode = _opCode;break;}
+            case 0x41:{ ins = std::make_unique<lstore_2>();ins->opCode = _opCode;break;}
+            case 0x42:{ ins = std::make_unique<lstore_3>();ins->opCode = _opCode;break;}
+            case 0x43:{ ins = std::make_unique<fstore_0>();ins->opCode = _opCode;break;}
+            case 0x44:{ ins = std::make_unique<fstore_1>();ins->opCode = _opCode;break;}
+            case 0x45:{ ins = std::make_unique<fstore_2>();ins->opCode = _opCode;break;}
+            case 0x46:{ ins = std::make_unique<fstore_3>();ins->opCode = _opCode;break;}
+            case 0x47:{ ins = std::make_unique<dstore_0>();ins->opCode = _opCode;break;}
+            case 0x48:{ ins = std::make_unique<dstore_1>();ins->opCode = _opCode;break;}
+            case 0x49:{ ins = std::make_unique<dstore_2>();ins->opCode = _opCode;break;}
+            case 0x4A:{ ins = std::make_unique<dstore_3>();ins->opCode = _opCode;break;}
+            case 0x4B:{ ins = std::make_unique<astore_0>();ins->opCode = _opCode;break;}
+            case 0x4C:{ ins = std::make_unique<astore_1>();ins->opCode = _opCode;break;}
+            case 0x4D:{ ins = std::make_unique<astore_2>();ins->opCode = _opCode;break;}
+            case 0x4E:{ ins = std::make_unique<astore_3>();ins->opCode = _opCode;break;}
+            case 0x4F:{ ins = std::make_unique<iastore>();ins->opCode = _opCode;break;}
+            case 0x50:{ ins = std::make_unique<lastore>();ins->opCode = _opCode;break;}
+            case 0x51:{ ins = std::make_unique<fastore>();ins->opCode = _opCode;break;}
+            case 0x52:{ ins = std::make_unique<dastore>();ins->opCode = _opCode;break;}
+            case 0x53:{ ins = std::make_unique<aastore>();ins->opCode = _opCode;break;}
+            case 0x54:{ ins = std::make_unique<bastore>();ins->opCode = _opCode;break;}
+            case 0x55:{ ins = std::make_unique<castore>();ins->opCode = _opCode;break;}
+            case 0x56:{ ins = std::make_unique<sastore>();ins->opCode = _opCode;break;}
+            case 0x57:{ ins = std::make_unique<pop>();ins->opCode = _opCode;break;}
+            case 0x58:{ ins = std::make_unique<pop2>();ins->opCode = _opCode;break;}
+            case 0x59:{ ins = std::make_unique<dup>();ins->opCode = _opCode;break;}
+            case 0x5A:{ ins = std::make_unique<dup_x1>();ins->opCode = _opCode;break;}
+            case 0x5B:{ ins = std::make_unique<dup_x2>();ins->opCode = _opCode;break;}
+            case 0x5C:{ ins = std::make_unique<dup2>();ins->opCode = _opCode;break;}
+            case 0x5D:{ ins = std::make_unique<dup2_x1>();ins->opCode = _opCode;break;}
+            case 0x5E:{ ins = std::make_unique<dup2_x2>();ins->opCode = _opCode;break;}
+            case 0x5F:{ ins = std::make_unique<swap>();ins->opCode = _opCode;break;}
+            case 0x60:{ ins = std::make_unique<iadd>();ins->opCode = _opCode;break;}
+            case 0x61:{ ins = std::make_unique<ladd>();ins->opCode = _opCode;break;}
+            case 0x62:{ ins = std::make_unique<fadd>();ins->opCode = _opCode;break;}
+            case 0x63:{ ins = std::make_unique<dadd>();ins->opCode = _opCode;break;}
+            case 0x64:{ ins = std::make_unique<isub>();ins->opCode = _opCode;break;}
+            case 0x65:{ ins = std::make_unique<lsub>();ins->opCode = _opCode;break;}
+            case 0x66:{ ins = std::make_unique<fsub>();ins->opCode = _opCode;break;}
+            case 0x67:{ ins = std::make_unique<dsub>();ins->opCode = _opCode;break;}
+            case 0x68:{ ins = std::make_unique<imul>();ins->opCode = _opCode;break;}
+            case 0x69:{ ins = std::make_unique<lmul>();ins->opCode = _opCode;break;}
+            case 0x6A:{ ins = std::make_unique<fmul>();ins->opCode = _opCode;break;}
+            case 0x6B:{ ins = std::make_unique<dmul>();ins->opCode = _opCode;break;}
+            case 0x6C:{ ins = std::make_unique<idiv>();ins->opCode = _opCode;break;}
+            case 0x6D:{ ins = std::make_unique<ldiv_>();ins->opCode = _opCode;break;}
+            case 0x6E:{ ins = std::make_unique<fdiv>();ins->opCode = _opCode;break;}
+            case 0x6F:{ ins = std::make_unique<ddiv>();ins->opCode = _opCode;break;}
+            case 0x70:{ ins = std::make_unique<irem>();ins->opCode = _opCode;break;}
+            case 0x71:{ ins = std::make_unique<lrem>();ins->opCode = _opCode;break;}
+            case 0x72:{ ins = std::make_unique<frem>();ins->opCode = _opCode;break;}
+            case 0x73:{ ins = std::make_unique<drem>();ins->opCode = _opCode;break;}
+            case 0x74:{ ins = std::make_unique<ineg>();ins->opCode = _opCode;break;}
+            case 0x75:{ ins = std::make_unique<lneg>();ins->opCode = _opCode;break;}
+            case 0x76:{ ins = std::make_unique<fneg>();ins->opCode = _opCode;break;}
+            case 0x77:{ ins = std::make_unique<dneg>();ins->opCode = _opCode;break;}
+            case 0x78:{ ins = std::make_unique<ishl>();ins->opCode = _opCode;break;}
+            case 0x79:{ ins = std::make_unique<lshl>();ins->opCode = _opCode;break;}
+            case 0x7A:{ ins = std::make_unique<ishr>();ins->opCode = _opCode;break;}
+            case 0x7B:{ ins = std::make_unique<lshr>();ins->opCode = _opCode;break;}
+            case 0x7C:{ ins = std::make_unique<iushr>();ins->opCode = _opCode;break;}
+            case 0x7D:{ ins = std::make_unique<lushr>();ins->opCode = _opCode;break;}
+            case 0x7E:{ ins = std::make_unique<iand>();ins->opCode = _opCode;break;}
+            case 0x7F:{ ins = std::make_unique<land>();ins->opCode = _opCode;break;}
+            case 0x80:{ ins = std::make_unique<ior>();ins->opCode = _opCode;break;}
+            case 0x81:{ ins = std::make_unique<lor>();ins->opCode = _opCode;break;}
+            case 0x82:{ ins = std::make_unique<ixor>();ins->opCode = _opCode;break;}
+            case 0x83:{ ins = std::make_unique<lxor>();ins->opCode = _opCode;break;}
+            case 0x84:{ ins = std::make_unique<iinc>();ins->opCode = _opCode;break;}
+            case 0x85:{ ins = std::make_unique<i2l>();ins->opCode = _opCode;break;}
+            case 0x86:{ ins = std::make_unique<i2f>();ins->opCode = _opCode;break;}
+            case 0x87:{ ins = std::make_unique<i2d>();ins->opCode = _opCode;break;}
+            case 0x88:{ ins = std::make_unique<l2i>();ins->opCode = _opCode;break;}
+            case 0x89:{ ins = std::make_unique<l2f>();ins->opCode = _opCode;break;}
+            case 0x8A:{ ins = std::make_unique<l2d>();ins->opCode = _opCode;break;}
+            case 0x8B:{ ins = std::make_unique<f2i>();ins->opCode = _opCode;break;}
+            case 0x8C:{ ins = std::make_unique<f2l>();ins->opCode = _opCode;break;}
+            case 0x8D:{ ins = std::make_unique<f2d>();ins->opCode = _opCode;break;}
+            case 0x8E:{ ins = std::make_unique<d2i>();ins->opCode = _opCode;break;}
+            case 0x8F:{ ins = std::make_unique<d2l>();ins->opCode = _opCode;break;}
+            case 0x90:{ ins = std::make_unique<d2f>();ins->opCode = _opCode;break;}
+            case 0x91:{ ins = std::make_unique<i2b>();ins->opCode = _opCode;break;}
+            case 0x92:{ ins = std::make_unique<i2c>();ins->opCode = _opCode;break;}
+            case 0x93:{ ins = std::make_unique<i2s>();ins->opCode = _opCode;break;}
+            case 0x94:{ ins = std::make_unique<lcmp>();ins->opCode = _opCode;break;}
+            case 0x95:{ ins = std::make_unique<fcmpl>();ins->opCode = _opCode;break;}
+            case 0x96:{ ins = std::make_unique<fcmpg>();ins->opCode = _opCode;break;}
+            case 0x97:{ ins = std::make_unique<dcmpl>();ins->opCode = _opCode;break;}
+            case 0x98:{ ins = std::make_unique<dcmpg>();ins->opCode = _opCode;break;}
+            case 0x99:{ ins = std::make_unique<ifeq>();ins->opCode = _opCode;break;}
+            case 0x9A:{ ins = std::make_unique<ifne>();ins->opCode = _opCode;break;}
+            case 0x9B:{ ins = std::make_unique<iflt>();ins->opCode = _opCode;break;}
+            case 0x9C:{ ins = std::make_unique<ifge>();ins->opCode = _opCode;break;}
+            case 0x9D:{ ins = std::make_unique<ifgt>();ins->opCode = _opCode;break;}
+            case 0x9E:{ ins = std::make_unique<ifle>();ins->opCode = _opCode;break;}
+            case 0x9F:{ ins = std::make_unique<if_icmpeq>();ins->opCode = _opCode;break;}
+            case 0xA0:{ ins = std::make_unique<if_icmpne>();ins->opCode = _opCode;break;}
+            case 0xA1:{ ins = std::make_unique<if_icmplt>();ins->opCode = _opCode;break;}
+            case 0xA2:{ ins = std::make_unique<if_icmpge>();ins->opCode = _opCode;break;}
+            case 0xA3:{ ins = std::make_unique<if_icmpgt>();ins->opCode = _opCode;break;}
+            case 0xA4:{ ins = std::make_unique<if_icmple>();ins->opCode = _opCode;break;}
+            case 0xA5:{ ins = std::make_unique<if_acmpeq>();ins->opCode = _opCode;break;}
+            case 0xA6:{ ins = std::make_unique<if_acmpne>();ins->opCode = _opCode;break;}
+            case 0xA7:{ ins = std::make_unique<goto_>();ins->opCode = _opCode;break;}
+            case 0xA8:{ ins = std::make_unique<jsr>();ins->opCode = _opCode;break;}
+            case 0xA9:{ ins = std::make_unique<ret>();ins->opCode = _opCode;break;}
+            case 0xAA:{ ins = std::make_unique<tableswitch>();ins->opCode = _opCode;break;}
+            case 0xAB:{ ins = std::make_unique<lookupswitch>();ins->opCode = _opCode;break;}
+            case 0xAC:{ ins = std::make_unique<ireturn>();ins->opCode = _opCode;break;}
+            case 0xAD:{ ins = std::make_unique<lreturn>();ins->opCode = _opCode;break;}
+            case 0xAE:{ ins = std::make_unique<freturn>();ins->opCode = _opCode;break;}
+            case 0xAF:{ ins = std::make_unique<dreturn>();ins->opCode = _opCode;break;}
+            case 0xB0:{ ins = std::make_unique<areturn>();ins->opCode = _opCode;break;}
+            case 0xB1:{ ins = std::make_unique<return_>();ins->opCode = _opCode;break;}
+            case 0xB2:{ ins = std::make_unique<getstatic>();ins->opCode = _opCode;break;}
+            case 0xB3:{ ins = std::make_unique<putstatic>();ins->opCode = _opCode;break;}
+            case 0xB4:{ ins = std::make_unique<getfield>();ins->opCode = _opCode;break;}
+            case 0xB5:{ ins = std::make_unique<putfield>();ins->opCode = _opCode;break;}
+            case 0xB6:{ ins = std::make_unique<invokevirtual>();ins->opCode = _opCode;break;}
+            case 0xB7:{ ins = std::make_unique<invokespecial>();ins->opCode = _opCode;break;}
+            case 0xB8:{ ins = std::make_unique<invokestatic>();ins->opCode = _opCode;break;}
+            case 0xB9:{ ins = std::make_unique<invokeinterface>();ins->opCode = _opCode;break;}
+            case 0xBA:{ ins = std::make_unique<invokedynamic>();ins->opCode = _opCode;break;}
+            case 0xBB:{ ins = std::make_unique<new_>();ins->opCode = _opCode;break;}
+            case 0xBC:{ ins = std::make_unique<newarray>();ins->opCode = _opCode;break;}
+            case 0xBD:{ ins = std::make_unique<anewarray>();ins->opCode = _opCode;break;}
+            case 0xBE:{ ins = std::make_unique<arraylength>();ins->opCode = _opCode;break;}
+            case 0xBF:{ ins = std::make_unique<athrow>();ins->opCode = _opCode;break;}
+            case 0xC0:{ ins = std::make_unique<checkcast>();ins->opCode = _opCode;break;}
+            case 0xC1:{ ins = std::make_unique<instanceof>();ins->opCode = _opCode;break;}
+            case 0xC2:{ ins = std::make_unique<monitorenter>();ins->opCode = _opCode;break;}
+            case 0xC3:{ ins = std::make_unique<monitiorexit>();ins->opCode = _opCode;break;}
+            case 0xC4:{ ins = std::make_unique<wide>();ins->opCode = _opCode;break;}
+            case 0xC5:{ ins = std::make_unique<multianewarray>();ins->opCode = _opCode;break;}
+            case 0xC6:{ ins = std::make_unique<ifnull>();ins->opCode = _opCode;break;}
+            case 0xC7:{ ins = std::make_unique<ifnonnull>();ins->opCode = _opCode;break;}
+            case 0xC8:{ ins = std::make_unique<goto_w>();ins->opCode = _opCode;break;}
+            case 0xC9:{ ins = std::make_unique<jsr_w>();ins->opCode = _opCode;break;}
+            case 0xCA:{ ins = std::make_unique<breakpoint>();ins->opCode = _opCode;break;}
+            case 0xFE:{ ins = std::make_unique<impdep1>();ins->opCode = _opCode;break;}
+            case 0xFF:{ ins = std::make_unique<impdep2>();ins->opCode = _opCode;break;}
             default:exception::panic("no such op code: " + std::to_string(_opCode));
         }
         return ins;

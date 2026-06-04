@@ -1,36 +1,21 @@
-//
-// Created by xuranus on 2/12/19.
-//
 #include "Slots.h"
-#include <cstring>
 #include <iostream>
 #include <cassert>
+#include <cstring>
 #include "../common/Exception.h"
 #include "heap/ObjectPool.h"
 
 namespace runtime {
-    Slots::Slots(u2 _size_) : _size(_size_) {
-        data = new Slot [_size];
-        memset(data, 0, sizeof(Slot) * _size);
-    }
 
-    Slots::Slots(const Slots &slots) : _size(slots._size) {
-        data = new Slot [slots._size];
-        memcpy(data, slots.data, sizeof(Slot) * slots._size);
-    }
-
-    Slots::~Slots() {
-        delete[] data;
-    }
+    Slots::Slots(u2 size) : data(size) {}
 
     bool Slots::isRef(int index) const {
         return data[index].ptrFlag;
     }
 
     int Slots::size() const {
-        return _size;
+        return static_cast<int>(data.size());
     }
-
 
     void Slots::setInt(u2 index, int val) {
         data[index].num = val;
@@ -38,29 +23,33 @@ namespace runtime {
     }
 
     int Slots::intValue(u2 index) const {
-        return (int)data[index].num;
+        return static_cast<int>(data[index].num);
     }
 
     void Slots::setLong(u2 index, long val) {
         data[index].ptrFlag = false;
         data[index + 1].ptrFlag = false;
-        data[index].num = (int) (val);
-        data[index + 1].num = (int) (val >> 32);
+        data[index].num = static_cast<int>(val);
+        data[index + 1].num = static_cast<int>(val >> 32);
     }
 
     long Slots::longValue(u2 index) const {
-        auto low = (u4) data[index].num;
-        auto high = (u4) data[index + 1].num;
-        return (long) high << 32 | (long) low;
+        auto low = static_cast<u4>(data[index].num);
+        auto high = static_cast<u4>(data[index + 1].num);
+        return (static_cast<long>(high) << 32) | static_cast<long>(low);
     }
 
     void Slots::setFloat(u2 index, float val) {
-        data[index].num = *(int *) (&val);
+        int tmp;
+        std::memcpy(&tmp, &val, sizeof(float));
+        data[index].num = tmp;
         data[index].ptrFlag = false;
     }
 
     float Slots::floatValue(u2 index) const {
-        return *(float *) (&data[index].num);
+        float val;
+        std::memcpy(&val, &data[index].num, sizeof(float));
+        return val;
     }
 
     bool Slots::boolValue(u2 index) const {
@@ -68,12 +57,16 @@ namespace runtime {
     }
 
     void Slots::setDouble(u2 index, double val) {
-        setLong(index, *(long *) (&val));
+        long tmp;
+        std::memcpy(&tmp, &val, sizeof(double));
+        setLong(index, tmp);
     }
 
     double Slots::doubleValue(u2 index) const {
         long t = longValue(index);
-        return *(double *) (&t);
+        double val;
+        std::memcpy(&val, &t, sizeof(double));
+        return val;
     }
 
     void Slots::setRef(u2 index, heap::Object* ref) {
@@ -82,8 +75,7 @@ namespace runtime {
     }
 
     heap::Object* Slots::refValue(u2 index) const {
-        heap::Object* ref = heap::ObjectPool::decompressPtr(data[index].num);
-        return ref;
+        return heap::ObjectPool::decompressPtr(data[index].num);
     }
 
     void Slots::setSlot(u2 index, Slot val) {
@@ -94,43 +86,32 @@ namespace runtime {
         return data[index];
     }
 
-    Slot& Slots::operator[](u2 index) const {
+    Slot& Slots::operator[](u2 index) {
         return data[index];
     }
 
-    Slots &Slots::operator=(const Slots &slots) {
-        if(this != &slots) {
-            _size = slots._size;
-            delete[] data;
-            data = new Slot[_size];
-            memcpy(data, slots.data, sizeof(Slot) * _size);
-        }
-        return *this;
+    const Slot& Slots::operator[](u2 index) const {
+        return data[index];
     }
 
     void Slots::resize(u2 newSize) {
-        _size = newSize;
-        delete[] data;
-        data = new Slot [newSize];
-        memset(data, 0, sizeof(Slot) * newSize);
+        data.assign(newSize, Slot{});
     }
 
     void Slots::dump() const {
         std::cout << "{ ";
-        for(int i = 0; i < _size; i++) {
-            if(data[i].ptrFlag) {
-                std::string objName = "obj";
-                if(data[i].num != 0) {
-                    objName = heap::ObjectPool::decompressPtr(data[i].num)->klass->name;
-                    std::cout << objName << "[" <<data[i].num << "]";
+        for (size_t i = 0; i < data.size(); i++) {
+            if (data[i].ptrFlag) {
+                if (data[i].num != 0) {
+                    std::string objName = heap::ObjectPool::decompressPtr(data[i].num)->klass->name;
+                    std::cout << objName << "[" << data[i].num << "]";
                 } else {
                     std::cout << "null";
                 }
-
             } else {
                 std::cout << data[i].num;
             }
-            if(i != _size - 1) {
+            if (i + 1 != data.size()) {
                 std::cout << ", ";
             }
         }
@@ -138,12 +119,7 @@ namespace runtime {
     }
 
 
-
-
-    SlotsStack::SlotsStack(u2 _capacity) :
-        slots(_capacity) {
-        size = 0;
-    }
+    SlotsStack::SlotsStack(u2 capacity) : size(0), slots(capacity) {}
 
     void SlotsStack::pushInt(int v) {
         slots.setInt(size++, v);
@@ -172,27 +148,31 @@ namespace runtime {
     }
 
     void SlotsStack::pushDouble(double v) {
-        pushLong(*(long *) (&v));
+        long tmp;
+        std::memcpy(&tmp, &v, sizeof(double));
+        pushLong(tmp);
     }
 
     double SlotsStack::popDouble() {
         long t = popLong();
-        return *(double *) (&t);
+        double val;
+        std::memcpy(&val, &t, sizeof(double));
+        return val;
     }
 
     void SlotsStack::pushBoolean(bool v) {
-        pushInt(v ? 1: 0);
+        pushInt(v ? 1 : 0);
     }
 
     bool SlotsStack::popBoolean() {
         return popInt() == 1;
     }
 
-    void SlotsStack::pushRef(heap::Object *ref) {
+    void SlotsStack::pushRef(heap::Object* ref) {
         slots.setRef(size++, ref);
     }
 
-    heap::Object *SlotsStack::popRef() {
+    heap::Object* SlotsStack::popRef() {
         return slots.refValue(--size);
     }
 
@@ -229,14 +209,13 @@ namespace runtime {
         slots.dump();
     }
 
-    std::vector<heap::Object *> SlotsStack::refs() const {
+    std::vector<heap::Object*> SlotsStack::refs() const {
         std::vector<heap::Object*> objects;
-        for(int i = 0; i < size; i++) {
-            if(slots.isRef(i)) {
+        for (int i = 0; i < size; i++) {
+            if (slots.isRef(i)) {
                 objects.push_back(slots.refValue(i));
             }
         }
         return objects;
     }
 }
-

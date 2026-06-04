@@ -8,15 +8,21 @@
 #include "Object.h"
 #include "../../basicType.h"
 #include <set>
+#include <vector>
+#include <memory>
 
 namespace heap {
 
     enum ObjectDataType: unsigned char;
 
     class ObjectPool {
+    private:
+        static void destroyObjectPool(Object* arr);
+
     public:
-        static Object* pool;
-        static bool* mark;
+        using PoolPtr = std::unique_ptr<Object[], void(*)(Object*)>;
+        static PoolPtr pool;
+        static std::vector<bool> mark;
         static int capacity;
         static int size;
         static bool inited;

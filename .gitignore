@@ -1,0 +1,25 @@
+# Build
+build/
+cmake-build-*/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing artifacts
+Testing/
+all.txt
+
+# Compiled
+*.o
+*.a
+*.so
+*.dylib
+*.exe

@@ -351,7 +351,7 @@ namespace heap {
         if (name[0] == '[') { // is array class
             arrayClassName = name; // example: [Ljava/lang/String -> [Ljava/lang/String;
         } if (this->isPrimitive()) { // is primitive type (int, short, bool, ....)
-            arrayClassName = primitiveTypes[name]; // example: int -> I
+            arrayClassName = getPrimitiveTypes().at(name); // example: int -> I
         } else { // is common class {
             arrayClassName = std::string("L") + name + ";"; // example: java/lang/String -> Ljava/lang/String;
         }
@@ -371,7 +371,7 @@ namespace heap {
             componentClassName = componentTypeDescriptor.substr(1, componentTypeDescriptor.length() - 2);
             // example: Ljava/lang/String => java/lang/String
         } else { // primitive type
-            for (auto &ele: primitiveTypes) { // primitive(int double ...) type descriptor
+            for (auto &ele: getPrimitiveTypes()) { // primitive(int double ...) type descriptor
                 if (ele.second == componentTypeDescriptor) {
                     componentClassName = ele.first;
                     break;
@@ -388,7 +388,7 @@ namespace heap {
     }
 
     bool Class::isPrimitive() const {
-        return primitiveTypes.find(name) != primitiveTypes.end();
+        return getPrimitiveTypes().find(name) != getPrimitiveTypes().end();
     }
 
     // weather class s can be cast to this class
@@ -524,35 +524,35 @@ namespace heap {
         return nullptr;
     }
 
-    std::vector<Method *> Class::getMethods(bool publicOnly) {
+    std::vector<Method *> Class::getMethods(bool publicOnly) const {
         std::vector<Method*> res;
-        for(Method& method: methods) {
+        for(const Method& method: methods) {
             if(!method.isClinit() && !method.isConstructor()) {
                 if(!publicOnly || method.isPublic()) {
-                    res.push_back(&method);
+                    res.push_back(const_cast<Method*>(&method));
                 }
             }
         }
         return res;
     }
 
-    std::vector<Method *> Class::getConstructors(bool publicOnly) {
+    std::vector<Method *> Class::getConstructors(bool publicOnly) const {
         std::vector<Method*> res;
-        for(Method& method: methods) {
+        for(const Method& method: methods) {
             if(method.isConstructor()) {
                 if(!publicOnly || method.isPublic()) {
-                    res.push_back(&method);
+                    res.push_back(const_cast<Method*>(&method));
                 }
             }
         }
         return res;
     }
 
-    std::vector<Field *> Class::getFields(bool publicOnly) {
+    std::vector<Field *> Class::getFields(bool publicOnly) const {
         std::vector<Field*> res;
-        for(Field& field: fields) {
+        for(const Field& field: fields) {
             if(!publicOnly || field.isPublic()) {
-                res.push_back(&field);
+                res.push_back(const_cast<Field*>(&field));
             }
         }
         return res;
@@ -568,7 +568,7 @@ namespace heap {
         for(auto& field: fields) {
             if(field.isStatic() && field.isRef()) {
                 heap::Object* object = staticVars.refValue(field.slotId);
-                assert(object == nullptr || (object < ObjectPool::pool + ObjectPool::capacity && object > ObjectPool::pool));
+                assert(object == nullptr || (object < ObjectPool::pool.get() + ObjectPool::capacity && object > ObjectPool::pool.get()));
                 res.insert(object);
             }
         }

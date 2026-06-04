@@ -160,7 +160,7 @@ namespace instruction {
 
         void execute(runtime::Frame* frame) override;
         void fetchOperands(InstructionReader &reader) override;
-        std::string verbose() override;
+        [[nodiscard]] std::string verbose() const override;
     };
 }
 

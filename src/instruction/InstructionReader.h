@@ -20,12 +20,12 @@ namespace instruction {
         InstructionReader();
         void reset(u1 *code, u4 pc, u4 length);
         [[nodiscard]] u4 PC() const;
-        uint8 readUint8();
-        int8 readInt8();
-        uint16 readUint16();
-        int16 readInt16();
-        int32 readInt32();
-        std::vector<int32> readInt32s(int jumpOffsetsCount);
+        u1 readUint8();
+        int8_t readInt8();
+        u2 readUint16();
+        int16_t readInt16();
+        int readInt32();
+        std::vector<int> readInt32s(int jumpOffsetsCount);
         void skipPadding();
         [[nodiscard]] bool end() const;
     };

@@ -5,6 +5,7 @@
 #include <cstring>
 #include <cassert>
 #include <set>
+#include <algorithm>
 #include "../../common/Console.h"
 #include "../../common/Exception.h"
 #include "ObjectPool.h"
@@ -13,8 +14,12 @@ const int MAX_OBJECTS = 4096 * 8; // heap default: 128KB * 8 = 1MB, sizeof(Objec
 
 namespace heap {
 
-    Object *ObjectPool::pool;
-    bool *ObjectPool::mark;
+    void ObjectPool::destroyObjectPool(Object* arr) {
+        delete[] arr;
+    }
+
+    ObjectPool::PoolPtr ObjectPool::pool(nullptr, &ObjectPool::destroyObjectPool);
+    std::vector<bool> ObjectPool::mark;
     int ObjectPool::size;
     int ObjectPool::capacity;
     bool ObjectPool::inited = false;
@@ -23,11 +28,10 @@ namespace heap {
         if(!ObjectPool::inited) {
             ObjectPool::inited = true;
             ObjectPool::capacity = MAX_OBJECTS;
-            ObjectPool::pool = new Object[MAX_OBJECTS];
-            ObjectPool::mark = new bool[MAX_OBJECTS];
+            ObjectPool::pool.reset(new Object[MAX_OBJECTS]);
+            ObjectPool::mark = std::vector<bool>(MAX_OBJECTS, false);
             ObjectPool::size = 1; // pool[0] reserved as nullptr
 
-            memset(ObjectPool::mark, 0, sizeof(bool) * ObjectPool::capacity);
             mark[0] = true; // pool[0] reserved as nullptr
         }
     }
@@ -36,8 +40,7 @@ namespace heap {
         if(obj == nullptr) {
             return 0;
         }
-        //auto compressed = (unsigned int) (((unsigned long) obj - (unsigned long) ObjectPool::pool) >> 3);
-        auto compressed = (unsigned int) (((unsigned long) obj - (unsigned long) ObjectPool::pool) / sizeof(Object));
+        auto compressed = (unsigned int) (((unsigned long) obj - (unsigned long) ObjectPool::pool.get()) / sizeof(Object));
         assert(compressed < ObjectPool::capacity);
         return compressed;
     }
@@ -46,9 +49,8 @@ namespace heap {
         if(index == 0) {
             return nullptr;
         }
-        //return (heap::Object *) ((((unsigned long) ptr) << 3) + (unsigned long) ObjectPool::pool);
         assert(index < ObjectPool::capacity);
-        return (heap::Object *) ((((unsigned long) index) * sizeof(Object)) + (unsigned long) ObjectPool::pool);
+        return (heap::Object *) ((((unsigned long) index) * sizeof(Object)) + (unsigned long) ObjectPool::pool.get());
     }
 
     int ObjectPool::findSpace() {
@@ -143,7 +145,7 @@ namespace heap {
         int index = findSpace();
         assert(index > 0 && index < ObjectPool::capacity);
         ObjectPool::pool[index] = object; // ObjectPool::pool[index] take ownership of data of object
-        return ObjectPool::pool + index;
+        return ObjectPool::pool.get() + index;
     }
 
 
@@ -190,7 +192,7 @@ namespace heap {
 
         // 1. init all markedOop to 0
         for(int i = 1; i < ObjectPool::size; i++) {
-            Object* object = ObjectPool::pool + i;
+            Object* object = ObjectPool::pool.get() + i;
             object->markedOop = 0;
         }
 
@@ -202,7 +204,7 @@ namespace heap {
         // 3. start clean
         int counter = 0;
         for(int i = 1; i < ObjectPool::size; i++) {
-            Object* object = ObjectPool::pool + i;
+            Object* object = ObjectPool::pool.get() + i;
 
             if(ObjectPool::mark[i]) {
                 if(!object->markedOop) {

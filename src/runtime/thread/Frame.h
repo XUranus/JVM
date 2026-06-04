@@ -2,21 +2,19 @@
 // Created by XUranus on 2019/2/1.
 //
 
-#ifndef JVM_FRAME_H
-#define JVM_FRAME_H
+#pragma once
 
-#include "../../../src/basicType.h"
+#include "basicType.h"
 #include "../Slots.h"
 #include "Thread.h"
 #include "../heap/Method.h"
 #include <string>
 
-
 namespace runtime {
 
     class Thread;
-    typedef Slots LocalVars;
-    typedef SlotsStack OperandStack;
+    using LocalVars = Slots;
+    using OperandStack = SlotsStack;
 
     class Frame {
     public:
@@ -40,4 +38,3 @@ namespace runtime {
     };
 
 }
-#endif //JVM_FRAME_H

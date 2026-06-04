@@ -86,7 +86,7 @@ namespace instruction {
         frame->operandStack.pushInt((int)val);
     }
 
-    std::string bipush::verbose() {
+    std::string bipush::verbose() const {
         return name() + "\t\t" + std::to_string(val);
     }
 

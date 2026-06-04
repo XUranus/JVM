@@ -10,9 +10,7 @@
 
 namespace native {
 
-    typedef void (*NativeMethod)(runtime::Frame *);
-
-    static std::map<std::string, NativeMethod> registry;
+    using NativeMethod = void (*)(runtime::Frame *);
 
     void initNativeRegistry();
 

@@ -32,7 +32,7 @@ namespace classfile {
         superClass = reader.readU2();
 
         interfaceCount = reader.readU2();
-        interfaces = new u2[interfaceCount];
+        interfaces.resize(interfaceCount);
         for(u2 i = 0; i < interfaceCount; i++) {
             interfaces[i] = reader.readU2();
         }
@@ -107,7 +107,7 @@ namespace classfile {
     std::string ClassFile::sourceFileName() const {
         for (u2 i = 0; i < attributeCount; i++) {
             if (attributes[i]->name() == "SourceFile") {
-                u2 sourceFileIndex = ((AttributeSourceFile*)attributes[i].get())->sourceFileIndex;
+                u2 sourceFileIndex = static_cast<AttributeSourceFile*>(attributes[i].get())->sourceFileIndex;
                 return constantPool->utf8(sourceFileIndex);
             }
         }

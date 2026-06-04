@@ -33,14 +33,8 @@ namespace classpath {
             return FilePath::absolutePath(xBootClassPath);
 
             // 2. $workingDir/jre
-#if defined(__linux__) || defined(__unix__)
         } else if (FilePath::exists(FilePath::absolutePath("./jre"))) {
             return FilePath::absolutePath("./jre");
-#endif
-#ifdef _MSC_VER
-        } else if(FilePath::exists(FilePath::absolutePath(".\\jre"))) {
-            return FilePath::absolutePath(".\\jre");
-#endif
 
             // 3. $JAVA_HOME/jre
         } else if (env != nullptr) {
@@ -63,11 +57,11 @@ namespace classpath {
 
     std::optional<classfile::BytesReader> ClassPath::readClass(const std::string& classname) const {
         std::string _classname = classname;
-        //replace . with /
-        //example: java.lang.Exception java/lang/Exception
-        for (char &ch: _classname) {
+        // replace . with / (Java class names always use '/' internally)
+        // example: java.lang.Exception -> java/lang/Exception
+        for (char &ch : _classname) {
             if (ch == '.') {
-                ch = FilePath::separator[0];
+                ch = '/';
             }
         }
         // classname won't take ".class" suffix! ->java/lang/Exception.class

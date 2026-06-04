@@ -5,7 +5,6 @@
 #ifndef JVM_CLASS_H
 #define JVM_CLASS_H
 
-#include <iostream>
 #include <vector>
 #include <string>
 #include <map>
@@ -23,7 +22,8 @@ namespace heap {
     class Field;
     class Method;
 
-    static std::map<std::string, std::string> primitiveTypes = {
+    inline const std::map<std::string, std::string>& getPrimitiveTypes() {
+        static const std::map<std::string, std::string> types = {
             { "void",       "V" },
             { "boolean",    "Z" },
             { "byte",       "B" },
@@ -33,7 +33,9 @@ namespace heap {
             { "char",       "C" },
             { "float",      "F" },
             { "double",     "D" }
-    };
+        };
+        return types;
+    }
 
     class Class {
     public:
@@ -129,9 +131,9 @@ namespace heap {
         Method *getStaticMethod(const std::string& name, const std::string& descriptor) const;
 
         // for reflection
-        std::vector<Method*> getMethods(bool publicOnly);
-        std::vector<Field*> getFields(bool publicOnly);
-        std::vector<Method*> getConstructors(bool publicOnly);
+        std::vector<Method*> getMethods(bool publicOnly) const;
+        std::vector<Field*> getFields(bool publicOnly) const;
+        std::vector<Method*> getConstructors(bool publicOnly) const;
         Method* getConstructor(const std::string& descriptor) const;
 
 

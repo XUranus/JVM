@@ -5,7 +5,7 @@
 #include "Method.h"
 #include "../thread/Thread.h"
 #include "../../instruction/instruction.h"
-#include "../../common//Exception.h"
+#include "../../common/Exception.h"
 #include "ClassLoader.h"
 #include "StringPool.h"
 #include "ObjectPool.h"
@@ -40,7 +40,7 @@ namespace heap {
             }
 
             // copy ExceptionTable attribute
-            exceptionTable = new ExceptionTable(constantPool, codeAttribute);
+            exceptionTable = std::make_unique<ExceptionTable>(constantPool, codeAttribute);
 
             // copy LineNumberTable attribute
             auto lineNumberTableAttribute = codeAttribute->attributeLineNumberTable();
@@ -53,11 +53,11 @@ namespace heap {
 
             // copy Annotation attribute
             auto* runtimeVisibleAnnotations =
-                    (classfile::AttributeRuntimeVisibleAnnotations*)methodInfo->getUnparsedAttribute("RuntimeVisibleAnnotations");
+                    static_cast<classfile::AttributeRuntimeVisibleAnnotations*>(methodInfo->getUnparsedAttribute("RuntimeVisibleAnnotations"));
             auto* runtimeVisibleParameterAnnotations =
-                    (classfile::AttributeRuntimeVisibleParameterAnnotations*)methodInfo->getUnparsedAttribute("RuntimeVisibleParameterAnnotations");
+                    static_cast<classfile::AttributeRuntimeVisibleParameterAnnotations*>(methodInfo->getUnparsedAttribute("RuntimeVisibleParameterAnnotations"));
             auto* annotationDefault =
-                    (classfile::AttributeAnnotationDefault*)methodInfo->getUnparsedAttribute("AnnotationDefault");
+                    static_cast<classfile::AttributeAnnotationDefault*>(methodInfo->getUnparsedAttribute("AnnotationDefault"));
 
             // TODO:: do translate
 //            annotationData = runtimeVisibleAnnotations;
@@ -93,9 +93,7 @@ namespace heap {
         }
     }
 
-    Method::~Method() {
-        delete exceptionTable;
-    }
+    Method::~Method() = default;
 
     // inject code for native method
     void Method::injectCodeAttribute(std::string returnType) {
@@ -166,7 +164,7 @@ namespace heap {
         } else if(descriptor[0] == 'L') {
             return descriptor.substr(1, descriptor.length() - 2);
         }
-        for(auto& pair: primitiveTypes) {
+        for(auto& pair: getPrimitiveTypes()) {
             if(pair.second == descriptor) {
                 return pair.first;
             }
@@ -210,8 +208,8 @@ namespace heap {
         code = {0xb1};
         argSlotCount = 0;
         klass = nullptr;
-        exceptionTable = new ExceptionTable;
+        exceptionTable = std::make_unique<ExceptionTable>();
     } // todo:: shim method
 
-    Method* Method::ShimMethod = new Method;
+    std::unique_ptr<Method> Method::ShimMethod = std::make_unique<Method>();
 }
