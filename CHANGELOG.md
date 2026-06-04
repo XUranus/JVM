@@ -27,7 +27,7 @@
 - **`Entry.cpp`**: All hardcoded `";"` separators now use `CompositeEntry::separator` constant
 
 ### ODR Violation Fixes (Static Globals in Headers)
-- **`Class.h`**: `static std::map primitiveTypes` → `inline const std::map primitiveTypes` (C++17)
+- **`Class.h`**: `static std::map primitiveTypes` → Meyer's singleton `getPrimitiveTypes()` function (thread-safe lazy initialization)
 - **`StringPool.h`**: Moved `static std::map internedStrings` from header to `StringPool.cpp`; added `allInternedStrings()` getter for GC root collection
 - **`NativeRegistry.h`**: Moved `static std::map registry` from header to `NativeRegistry.cpp`
 - **`Exception.h`**: `static` functions → `inline` functions; fixed `exception()` parameter from pass-by-value to `const std::string&`
@@ -36,8 +36,10 @@
 - **`Instruction` (interpreter loop)**: `instruction::create()` now returns `std::unique_ptr<Instruction>` — **fixed per-instruction memory leak** in the main interpreter loop
 - **`BytesReader`**: Replaced raw `u1* buffer` with `std::vector<u1>` — **fixed buffer leak** (old code had no destructor and a double-allocation bug); replaced `fopen`/`fread`/`fclose` with `std::ifstream`
 - **`Method::exceptionTable`**: `ExceptionTable*` → `std::unique_ptr<ExceptionTable>` — removed manual `delete` in destructor
+- **`Method::ShimMethod`**: `static Method*` → `static std::unique_ptr<Method>` — process-lifetime allocation now properly managed
 - **`Slots::data`**: `Slot* data` with manual new/delete → `std::vector<Slot> data` — eliminated manual copy constructor, assignment operator, and destructor (Rule of Zero)
 - **`ClassFile::interfaces`**: `u2* interfaces` (raw array) → `std::vector<u2> interfaces`
+- **`ObjectPool`**: `static Object* pool` → `std::unique_ptr<Object[]>`; `static bool* mark` → `std::vector<bool>` — replaced raw heap arrays with RAII types
 - **`GZipPool`**: Now returns `std::optional<std::vector<u1>>` instead of raw `new unsigned char[]` with ambiguous ownership; added `closeAll()` to clean up cached zip handles
 
 ### Code Style Modernization
@@ -49,6 +51,9 @@
 - **`typedef` → `using`**: `Frame.h` — `typedef Slots LocalVars` → `using LocalVars = Slots`
 - **Const-correctness**: `Class::getMethods()`, `getFields()`, `getConstructors()` now `const`; `Instruction::verbose()` and all overrides now `const`
 - **Removed unnecessary `#include <iostream>`** from headers that don't use it
+- **`Slots::dump()`**: Fixed unsigned integer underflow — `i != data.size() - 1` → `i + 1 != data.size()`
+- **`System.cpp`**: Hardcoded system properties now platform-detected via preprocessor (`os.name`, `os.arch`, `file.separator`, `path.separator`, `line.separator`)
+- **`basicType.h`**: Removed legacy `uint8`/`int8`/`uint16`/`int16`/`uint32`/`int32` type aliases; migrated all callers to `u1`/`u2`/`u4`/`int8_t`/`int16_t`
 
 ### CI & Tests
 - **GitHub Actions** (`.github/workflows/build.yml`): Build matrix across `ubuntu-latest`, `macos-latest`, `windows-latest` with automatic libzip installation; added ASan/UBSan sanitizer job
