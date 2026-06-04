@@ -23,3 +23,5 @@ all.txt
 *.so
 *.dylib
 *.exe
+out
+jre/
