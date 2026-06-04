@@ -24,9 +24,6 @@ namespace native::java::lang {
         static void jClassSetRegister(heap::Object* jClass, heap::Class* klass);
         static heap::Class* reflectClass(heap::Object* jClassObject);
 
-        // native
-        static void doRegistration();
-
         static void getPrimitiveClass(runtime::Frame *frame);
         static void getName0(runtime::Frame *frame);
         static void desiredAssertionStatus0(runtime::Frame *frame);

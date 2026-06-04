@@ -11,14 +11,6 @@ namespace native::java::io::FileInputStream {
 
     static std::map<heap::Object*, FILE *> _fileOpenMap;
 
-    void doRegistration() {
-        const std::string className = "java/io/FileInputStream";
-        setRegister(className, "open0", "(Ljava/lang/String;)V", open0);
-        setRegister(className, "close0", "()V", close0);
-        setRegister(className, "readBytes", "([BII)I", readBytes);
-        setRegister(className, "available0", "()I", available0);
-    }
-
     // private native void readBytes(byte[] b, int off, int len)
     // throw IOException
     void readBytes(runtime::Frame* frame) {

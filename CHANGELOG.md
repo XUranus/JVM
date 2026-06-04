@@ -66,3 +66,25 @@
   - `StackTest` (4): empty, push/pop, LIFO ordering, multiple operations
   - `FrameTest` (12): local vars (all types), operand stack (all types), mixed ops, branch
 - **Fixed `MethodDescriptorParser`**: Rewrote `parseFieldType()` to peek without consuming — the old code called `readChar()` in the default case without unreading, causing the `)` delimiter to be consumed. The parser now works correctly in both Debug and Release builds. Replaced `assert()` with `exception::panic()` for proper error reporting.
+
+### Bug Fixes
+- **`fastore`**: Fixed inverted null check (`if (object)` → `if (!object)`) — would crash on valid refs and silently proceed on null
+- **`Attributes.cpp:498`**: Fixed loop condition `i > numAnnotations` → `i < numAnnotations` — type annotations were never parsed
+- **`Attributes.cpp:433,458`**: Fixed bitwise `&` → logical `&&` in StackMapFrame type range checks
+- **`Attributes.cpp`**: Fixed 8 `reserve()` → `resize()` bugs — `reserve` does not change `size()`, so `[i] =` was undefined behavior
+- **`AttributeSourceDebugExtension`**: Fixed uninitialized pointer read — allocated buffer once, read once
+
+### Code Compression (Modern C++ Refactoring)
+- **`instruction/`**: Replaced 7 category files (constants, loads, stores, math, conversions, comparisons, control) with C++17 template-based instructions in `instructions.h/.cpp`
+  - `IndexedLoad/Store`, `FixedSlotLoad/Store`, `ArrayLoad/Store`, `BinMath`, `UnaryMath`, `Conversion`, `CmpAndPush`, `IfBranch`, `IfCmpBranch`, `TypedReturn`, `ConstPush` templates
+  - Opcode dispatch: static table replaces 210-case switch in `create()` and `name()`
+  - **3,885 → 2,485 lines** (−1,400 lines, −36%)
+- **`native/`**: Data-driven registration table replaces 21 `doRegistration()` functions
+  - Single `nativeTable[]` array in `NativeRegistry.cpp` with all 72 entries
+  - Removed `doRegistration()` from 22 .cpp files and 22 .h files
+  - **2,394 → 2,312 lines** (−82 lines)
+- **`classfile/`**: Merged 3 MemberRef classes + map-based attribute factory
+  - `ConstantFieldRef`/`ConstantMethodRef`/`ConstantInterfaceMethodRef` → single `ConstantMemberRef` with `MemberRefKind` enum
+  - 23-branch if/else in `AttributeInfo::from()` → `std::unordered_map` lookup
+  - **2,067 → 2,011 lines** (−56 lines)
+- **Total compression**: 12,951 → 11,413 source lines (−1,538 lines, −12%)

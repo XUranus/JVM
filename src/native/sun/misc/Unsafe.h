@@ -9,8 +9,6 @@
 #include "../../../runtime/thread/Frame.h"
 
 namespace native::sun::misc::Unsafe {
-    void doRegistration();
-
     void arrayBaseOffset(runtime::Frame *frame);
     void arrayIndexScale(runtime::Frame* frame);
     void addressSize(runtime::Frame* frame);

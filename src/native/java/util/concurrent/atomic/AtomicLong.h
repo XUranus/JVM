@@ -9,8 +9,6 @@
 #include "../../../../../runtime/thread/Frame.h"
 
 namespace native::java::util::concurrent::atomic::AtomicLong {
-    void doRegistration();
-
     void VMSupportsCS8(runtime::Frame* frame);
 }
 

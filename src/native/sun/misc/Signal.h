@@ -9,8 +9,6 @@
 #include "../../../runtime/thread/Frame.h"
 
 namespace native::sun::misc::Signal {
-    void doRegistration();
-
     void findSignal(runtime::Frame* frame);
     void handle0(runtime::Frame* frame);
 };

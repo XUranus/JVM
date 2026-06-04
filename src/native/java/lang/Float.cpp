@@ -9,11 +9,6 @@
 
 namespace native::java::lang::Float {
 
-    void doRegistration() {
-        setRegister("java/lang/Float", "floatToRawIntBits", "(F)I", native::java::lang::Float::floatToRawIntBits);
-        setRegister("java/lang/Float", "intBitsToFloat", "(I)F", native::java::lang::Float::intBitsToFloat);
-    }
-
     // public static native int floatToRawIntBits(float value);
     // (F)I
     void floatToRawIntBits(runtime::Frame *frame) {

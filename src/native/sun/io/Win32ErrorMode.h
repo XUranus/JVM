@@ -9,8 +9,6 @@
 #include "../../../runtime/thread/Frame.h"
 
 namespace native::sun::io::Win32ErrorMode {
-    void doRegistration();
-
     void setErrorMode(runtime::Frame* frame);
 }
 

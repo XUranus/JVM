@@ -8,8 +8,6 @@
 #include "../../../runtime/thread/Frame.h"
 
 namespace native::java::lang::Thread {
-    void doRegistration();
-
     void currentThread(runtime::Frame *frame);
     void setPriority0(runtime::Frame *frame);
     void isAlive(runtime::Frame *frame);

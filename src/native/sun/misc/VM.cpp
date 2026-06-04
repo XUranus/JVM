@@ -12,10 +12,6 @@
 
 namespace native::sun::misc::VM {
 
-    void doRegistration() {
-        setRegister("sun/misc/VM", "initialize", "()V", initialize);
-    }
-
     // sum.misc.Vm  initialize()V
 //    void initialize(runtime::Frame *frame) {
 //        heap::Class* vmClass = frame->method->klass;

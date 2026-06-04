@@ -12,10 +12,6 @@
 
 namespace native::java::lang::String {
 
-    void doRegistration() {
-        setRegister("java/lang/String", "intern", "()Ljava/lang/String;", native::java::lang::String::intern);
-    }
-
     // public native String intern();
     // ()Ljava/lang/String;
     void intern(runtime::Frame *frame) {

@@ -8,8 +8,6 @@
 #include "../../../runtime/thread/Frame.h"
 
 namespace native::sun::misc::VM {
-    void doRegistration();
-
     void initialize(runtime::Frame *frame);
 }
 

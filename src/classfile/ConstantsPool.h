@@ -98,34 +98,14 @@ namespace classfile {
         std::string verbose() override;
     };
 
-    class ConstantFieldRef:public ConstantInfo { //MemberRef
-    private:
-        u2 classIndex;
-        u2 classAndTypeIndex;
-    public:
-        ConstantFieldRef(u1 tag, BytesReader& reader, ConstantsPool* pool);
-        std::string className();
-        std::pair<std::string,std::string> nameAndDescriptor();
-        std::string verbose() override;
-    };
+    enum class MemberRefKind { Field, Method, InterfaceMethod };
 
-    class ConstantMethodRef:public ConstantInfo { //MemberRef
-    private:
+    struct ConstantMemberRef : public ConstantInfo {
         u2 classIndex;
         u2 nameAndTypeIndex;
-    public:
-        ConstantMethodRef(u1 tag, BytesReader& reader, ConstantsPool* pool);
-        std::string className();
-        std::pair<std::string,std::string> nameAndDescriptor();
-        std::string verbose() override;
-    };
+        MemberRefKind kind;
 
-    class ConstantInterfaceMethodRef:public ConstantInfo { //MemberRef
-    private:
-        u2 classIndex;
-        u2 classAndTypeIndex;
-    public:
-        ConstantInterfaceMethodRef(u1 tag, BytesReader& reader, ConstantsPool* pool);
+        ConstantMemberRef(u1 tag, BytesReader& reader, ConstantsPool* pool, MemberRefKind k);
         std::string className();
         std::pair<std::string,std::string> nameAndDescriptor();
         std::string verbose() override;

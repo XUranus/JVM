@@ -8,8 +8,6 @@
 #include "../../../runtime/thread/Frame.h"
 
 namespace native::java::lang::System {
-    void doRegistration();
-
     void arraycopy(runtime::Frame* frame);
     void setOut0(runtime::Frame* frame);
     void setIn0(runtime::Frame* frame);

@@ -12,11 +12,6 @@
 
 namespace native::sun::reflect::Reflection {
 
-    void doRegistration() {
-        setRegister("sun/reflect/Reflection", "getCallerClass", "()Ljava/lang/Class;", getCallerClass);
-        setRegister("sun/reflect/Reflection", "getClassAccessFlags", "(Ljava/lang/Class;)I", getClassAccessFlags);
-    }
-
     // public static native Class<?> getCallerClass();
     // ()Ljava/lang/Class;
     void getCallerClass(runtime::Frame *frame) {

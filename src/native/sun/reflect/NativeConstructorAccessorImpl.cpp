@@ -12,10 +12,6 @@
 
 namespace native::sun::reflect::NativeConstructorAccessorImpl {
 
-    void doRegistration() {
-        setRegister("sun/reflect/NativeConstructorAccessorImpl", "newInstance0", "(Ljava/lang/reflect/Constructor;[Ljava/lang/Object;)Ljava/lang/Object;", newInstance0);
-    }
-
     heap::Method* getMethod(heap::Object* methodObj, bool isConstructor) {
         heap::Method* method = native::java::lang::Class::reflectMethod(methodObj);
         if(method) {

@@ -12,13 +12,6 @@ namespace native::java::io::FileOutputStream {
 
     static std::map<heap::Object*, FILE *> _fileOpenMap;
 
-    void doRegistration() {
-        const std::string className = "java/io/FileOutputStream";
-        setRegister(className, "writeBytes", "([BIIZ)V", writeBytes);
-        setRegister(className, "open0", "(Ljava/lang/String;Z)V", open0);
-        setRegister(className, "close0", "()V", close0);
-    }
-
     // private native void writeBytes(byte[] b, int off, int len, boolean append)
     // throw IOException
     void writeBytes(runtime::Frame* frame) {

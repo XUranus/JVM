@@ -12,6 +12,13 @@ namespace native {
 
     using NativeMethod = void (*)(runtime::Frame *);
 
+    struct NativeEntry {
+        const char* cls;
+        const char* method;
+        const char* desc;
+        NativeMethod func;
+    };
+
     void initNativeRegistry();
 
     void setRegister(const std::string& className,

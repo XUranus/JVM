@@ -1,11 +1,14 @@
-include(FetchContent)
-FetchContent_Declare(
-    googletest
-    GIT_REPOSITORY https://github.com/google/googletest.git
-    GIT_TAG v1.14.0
-)
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
+find_package(GTest QUIET)
+if(NOT GTest_FOUND)
+    include(FetchContent)
+    FetchContent_Declare(
+        googletest
+        GIT_REPOSITORY https://github.com/google/googletest.git
+        GIT_TAG v1.14.0
+    )
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(googletest)
+endif()
 
 add_executable(xjava_tests
     SlotsTest.cpp
@@ -17,7 +20,7 @@ add_executable(xjava_tests
     FrameTest.cpp
 )
 
-target_link_libraries(xjava_tests PRIVATE xjava_lib gtest_main libzip::zip)
+target_link_libraries(xjava_tests PRIVATE xjava_lib gtest gtest_main libzip::zip)
 
 include(GoogleTest)
 gtest_discover_tests(xjava_tests)

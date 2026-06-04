@@ -13,13 +13,6 @@
 
 namespace native::java::lang::Thread {
 
-    void doRegistration() {
-        setRegister("java/lang/Thread", "currentThread", "()Ljava/lang/Thread;", currentThread);
-        setRegister("java/lang/Thread", "setPriority0", "(I)V", setPriority0);
-        setRegister("java/lang/Thread", "isAlive", "()Z", isAlive);
-        setRegister("java/lang/Thread", "start0", "()V", start0);
-    }
-
     // public static native Thread currentThread();
     // ()Ljava/lang/Thread;
     void currentThread(runtime::Frame* frame) {

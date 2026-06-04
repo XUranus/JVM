@@ -21,7 +21,6 @@ namespace native::java::lang {
         };
 
         static std::map<heap::Object *, std::vector<StackTraceElement>> exceptionStackTraceMap;
-        static void deRegistration();
 
         static void fillInStackTrace(runtime::Frame *frame);
     };

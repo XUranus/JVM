@@ -9,8 +9,6 @@
 #include "../../../runtime/thread/Frame.h"
 
 namespace native::java::lang::Runtime {
-    void doRegistration();
-
     void availableProcessors(runtime::Frame* frame);
 };
 

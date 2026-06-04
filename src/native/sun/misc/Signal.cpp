@@ -8,11 +8,6 @@
 
 namespace native::sun::misc::Signal {
 
-    void doRegistration() {
-        setRegister("sun/misc/Signal", "findSignal", "(Ljava/lang/String;)I", findSignal);
-        setRegister("sun/misc/Signal", "handle0", "(IJ)J", handle0);
-    }
-
     // private static native int findSignal(String string);
     // (Ljava/lang/String;)I
     void findSignal(runtime::Frame* frame) {

@@ -16,16 +16,6 @@
 
 namespace native::java::lang::System {
 
-    void doRegistration() {
-        const std::string jlSystem = "java/lang/System";
-        setRegister(jlSystem, "arraycopy", "(Ljava/lang/Object;ILjava/lang/Object;II)V", arraycopy);
-        setRegister(jlSystem, "setOut0", "(Ljava/io/PrintStream;)V", setOut0);
-        setRegister(jlSystem, "setErr0", "(Ljava/io/PrintStream;)V", setErr0);
-        setRegister(jlSystem, "setIn0", "(Ljava/io/InputStream;)V", setIn0);
-        setRegister(jlSystem, "currentTimeMillis", "()J", currentTimeMillis);
-        setRegister(jlSystem, "initProperties", "(Ljava/util/Properties;)Ljava/util/Properties;", initProperties);
-    }
-
     bool checkArrayCopy(heap::Object *src, heap::Object *dest) {
         auto srcClass = src->klass;
         auto destClass = dest->klass;

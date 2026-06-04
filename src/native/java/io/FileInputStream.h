@@ -8,8 +8,6 @@
 #include "../../../runtime/thread/Frame.h"
 
 namespace native::java::io::FileInputStream {
-    void doRegistration();
-
     void open0(runtime::Frame* frame);
     void close0(runtime::Frame* frame);
     void readBytes(runtime::Frame* frame);

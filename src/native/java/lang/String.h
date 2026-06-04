@@ -8,8 +8,6 @@
 #include "../../../runtime/thread/Frame.h"
 
 namespace native::java::lang::String {
-    void doRegistration();
-
     void intern(runtime::Frame* frame);
 };
 

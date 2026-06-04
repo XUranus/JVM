@@ -20,9 +20,9 @@ namespace classfile {
             case CONSTANT_Double:               return new ConstantDouble(tag, reader, pool);
             case CONSTANT_Class:                return new ConstantClass(tag, reader, pool);
             case CONSTANT_String:               return new ConstantString(tag, reader, pool);
-            case CONSTANT_FieldRef:             return new ConstantFieldRef(tag, reader, pool);
-            case CONSTANT_MethodRef:            return new ConstantMethodRef(tag, reader, pool);
-            case CONSTANT_InterfaceMethodRef:   return new ConstantInterfaceMethodRef(tag, reader, pool);
+            case CONSTANT_FieldRef:             return new ConstantMemberRef(tag, reader, pool, MemberRefKind::Field);
+            case CONSTANT_MethodRef:            return new ConstantMemberRef(tag, reader, pool, MemberRefKind::Method);
+            case CONSTANT_InterfaceMethodRef:   return new ConstantMemberRef(tag, reader, pool, MemberRefKind::InterfaceMethod);
             case CONSTANT_NameAndType:          return new ConstantNameAndType(tag, reader, pool);
             case CONSTANT_MethodHandle:         return new ConstantMethodHandle(tag, reader, pool);
             case CONSTANT_MethodType:           return new ConstantMethodType(tag, reader, pool);
@@ -135,63 +135,30 @@ namespace classfile {
     }
 
 
-    ConstantFieldRef::ConstantFieldRef(u1 tag, BytesReader& reader, ConstantsPool* pool): ConstantInfo(tag, pool) {
-        classIndex = reader.readU2();
-        classAndTypeIndex = reader.readU2();
-
-    }
-
-    std::string ConstantFieldRef::className() {
-        return constantsPool->className(classIndex);
-    }
-
-    std::pair<std::string, std::string> ConstantFieldRef::nameAndDescriptor() {
-        return constantsPool->nameAndDescriptor(classAndTypeIndex);
-    }
-
-    std::string ConstantFieldRef::verbose() {
-        auto pair = nameAndDescriptor();
-        return "FieldRef\t\t\t\t#" + std::to_string(classIndex) + ".#" + std::to_string(classAndTypeIndex)
-        + "\t\t\t// " + className() + "." + pair.first + ":" + pair.second;
-    }
-
-    ConstantMethodRef::ConstantMethodRef(u1 tag, BytesReader& reader, ConstantsPool* pool): ConstantInfo(tag, pool) {
+    ConstantMemberRef::ConstantMemberRef(u1 tag, BytesReader& reader, ConstantsPool* pool, MemberRefKind k)
+        : ConstantInfo(tag, pool), kind(k) {
         classIndex = reader.readU2();
         nameAndTypeIndex = reader.readU2();
     }
 
-    std::string ConstantMethodRef::className() {
+    std::string ConstantMemberRef::className() {
         return constantsPool->className(classIndex);
     }
 
-    std::pair<std::string, std::string> ConstantMethodRef::nameAndDescriptor() {
+    std::pair<std::string, std::string> ConstantMemberRef::nameAndDescriptor() {
         return constantsPool->nameAndDescriptor(nameAndTypeIndex);
     }
 
-    std::string ConstantMethodRef::verbose() {
+    std::string ConstantMemberRef::verbose() {
         auto pair = nameAndDescriptor();
-        return "MethodRef\t\t\t\t#" + std::to_string(classIndex) + ".#" + std::to_string(nameAndTypeIndex)
-              + "\t\t\t// " + className() + "." + pair.first + ":" + pair.second;
-    };
-
-    ConstantInterfaceMethodRef::ConstantInterfaceMethodRef(u1 tag, BytesReader& reader, ConstantsPool* pool): ConstantInfo(tag, pool) {
-        classIndex = reader.readU2();
-        classAndTypeIndex = reader.readU2();
-
-    }
-
-    std::string ConstantInterfaceMethodRef::className() {
-        return constantsPool->className(classIndex);
-    }
-
-    std::pair<std::string,std::string> ConstantInterfaceMethodRef::nameAndDescriptor() {
-        return constantsPool->nameAndDescriptor(classAndTypeIndex);
-    }
-
-    std::string ConstantInterfaceMethodRef::verbose() {
-        auto pair = nameAndDescriptor();
-        return "InterfaceMethodRef\t#" + std::to_string(classIndex) + ".#" + std::to_string(classAndTypeIndex)
-               + "\t\t\t\t// " + className() + "." + pair.first + ":" + pair.second;
+        std::string label;
+        switch (kind) {
+            case MemberRefKind::Field:           label = "FieldRef";           break;
+            case MemberRefKind::Method:          label = "MethodRef";          break;
+            case MemberRefKind::InterfaceMethod: label = "InterfaceMethodRef"; break;
+        }
+        return label + "\t\t\t\t#" + std::to_string(classIndex) + ".#" + std::to_string(nameAndTypeIndex)
+               + "\t\t\t// " + className() + "." + pair.first + ":" + pair.second;
     }
 
     ConstantNameAndType::ConstantNameAndType(u1 tag, BytesReader& reader, ConstantsPool* pool): ConstantInfo(tag, pool) {
@@ -335,21 +302,8 @@ namespace classfile {
             || tag == CONSTANT_MethodRef
             || tag == CONSTANT_InterfaceMethodRef);
 #endif
-        if(tag == CONSTANT_MethodRef) {
-            auto className = ((ConstantMethodRef *) constants[index].get())->className();
-            auto nameAndDescriptor = ((ConstantMethodRef *) constants[index].get())->nameAndDescriptor();
-            return std::make_pair(className, nameAndDescriptor);
-        } else if(tag == CONSTANT_FieldRef) {
-            auto className = ((ConstantFieldRef *) constants[index].get())->className();
-            auto nameAndDescriptor = ((ConstantFieldRef *) constants[index].get())->nameAndDescriptor();
-            return std::make_pair(className, nameAndDescriptor);
-        } else if(tag == CONSTANT_InterfaceMethodRef) {
-            auto className = ((ConstantInterfaceMethodRef *) constants[index].get())->className();
-            auto nameAndDescriptor = ((ConstantInterfaceMethodRef *) constants[index].get())->nameAndDescriptor();
-            return std::make_pair(className, nameAndDescriptor);
-        }
-        exception::panic("no such member ref tag: " + std::to_string(tag));
-        exit(1);
+        auto* ref = (ConstantMemberRef*) constants[index].get();
+        return std::make_pair(ref->className(), ref->nameAndDescriptor());
     }
 
     void ConstantsPool::dump() const {

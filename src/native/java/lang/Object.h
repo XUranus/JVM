@@ -8,8 +8,6 @@
 #include "../../../runtime/thread/Frame.h"
 
 namespace native::java::lang::Object {
-    void doRegistration();
-
     void getClass(runtime::Frame* frame);
     void hashCode(runtime::Frame* frame);
     void clone(runtime::Frame* frame);

@@ -12,10 +12,6 @@
 
 namespace native::java::io::FileDescriptor {
 
-    void doRegistration() {
-        setRegister("java/io/FileDescriptor", "set", "(I)J", set);
-    }
-
     // private static native long set(int d);
     // (I)J
     void set(runtime::Frame *frame) {

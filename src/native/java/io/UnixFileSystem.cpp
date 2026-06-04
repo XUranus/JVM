@@ -10,11 +10,6 @@
 
 namespace native::java::io::UnixFileSystem {
 
-    void doRegistration() {
-        setRegister("java/io/UnixFileSystem", "canonicalize0", "(Ljava/lang/String;)Ljava/lang/String;", canonicalize0);
-        setRegister("java/io/UnixFileSystem", "getBooleanAttributes0", "(Ljava/io/File;)I", getBooleanAttributes0);
-    }
-
     // private native String canonicalize0(String path) throws IOException;
     // (Ljava/lang/String;)Ljava/lang/String;
     void canonicalize0(runtime::Frame *frame) {

@@ -5,6 +5,8 @@
 #include "Attributes.h"
 #include "../common/Exception.h"
 #include <memory>
+#include <unordered_map>
+#include <functional>
 
 namespace classfile {
 
@@ -147,40 +149,48 @@ namespace classfile {
 
 namespace classfile {
 
+    using AttributeFactory = std::function<AttributeInfo*(u2, u4, ConstantsPool*, BytesReader&)>;
+
+    static const std::unordered_map<std::string, AttributeFactory>& attributeFactories() {
+        static const std::unordered_map<std::string, AttributeFactory> factories = {
+            {"ConstantValue",                     [](u2 ni, u4 l, ConstantsPool* cp, BytesReader& r) -> AttributeInfo* { return new AttributeConstantValue(ni,l,cp,r); }},
+            {"Code",                              [](u2 ni, u4 l, ConstantsPool* cp, BytesReader& r) -> AttributeInfo* { return new AttributeCode(ni,l,cp,r); }},
+            {"Exceptions",                        [](u2 ni, u4 l, ConstantsPool* cp, BytesReader& r) -> AttributeInfo* { return new AttributeExceptions(ni,l,cp,r); }},
+            {"SourceFile",                        [](u2 ni, u4 l, ConstantsPool* cp, BytesReader& r) -> AttributeInfo* { return new AttributeSourceFile(ni,l,cp,r); }},
+            {"LineNumberTable",                   [](u2 ni, u4 l, ConstantsPool* cp, BytesReader& r) -> AttributeInfo* { return new AttributeLineNumberTable(ni,l,cp,r); }},
+            {"LocalVariableTable",                [](u2 ni, u4 l, ConstantsPool* cp, BytesReader& r) -> AttributeInfo* { return new AttributeLocalVariableTable(ni,l,cp,r); }},
+            {"InnerClasses",                      [](u2 ni, u4 l, ConstantsPool* cp, BytesReader& r) -> AttributeInfo* { return new AttributeInnerClasses(ni,l,cp,r); }},
+            {"Synthetic",                         [](u2 ni, u4 l, ConstantsPool* cp, BytesReader& r) -> AttributeInfo* { return new AttributeSynthetic(ni,l,cp,r); }},
+            {"Deprecated",                        [](u2 ni, u4 l, ConstantsPool* cp, BytesReader& r) -> AttributeInfo* { return new AttributeDeprecated(ni,l,cp,r); }},
+            {"EnclosingMethod",                   [](u2 ni, u4 l, ConstantsPool* cp, BytesReader& r) -> AttributeInfo* { return new AttributeEnclosingMethod(ni,l,cp,r); }},
+            {"Signature",                         [](u2 ni, u4 l, ConstantsPool* cp, BytesReader& r) -> AttributeInfo* { return new AttributeSignature(ni,l,cp,r); }},
+            {"SourceDebugExtension",              [](u2 ni, u4 l, ConstantsPool* cp, BytesReader& r) -> AttributeInfo* { return new AttributeSourceDebugExtension(ni,l,cp,r); }},
+            {"LocalVariableTypeTable",            [](u2 ni, u4 l, ConstantsPool* cp, BytesReader& r) -> AttributeInfo* { return new AttributeLocalVariableTypeTable(ni,l,cp,r); }},
+            {"RuntimeVisibleAnnotations",         [](u2 ni, u4 l, ConstantsPool* cp, BytesReader& r) -> AttributeInfo* { return new AttributeRuntimeVisibleAnnotations(ni,l,cp,r); }},
+            {"RuntimeInvisibleAnnotations",       [](u2 ni, u4 l, ConstantsPool* cp, BytesReader& r) -> AttributeInfo* { return new AttributeRuntimeInvisibleAnnotations(ni,l,cp,r); }},
+            {"RuntimeVisibleParameterAnnotations", [](u2 ni, u4 l, ConstantsPool* cp, BytesReader& r) -> AttributeInfo* { return new AttributeRuntimeVisibleParameterAnnotations(ni,l,cp,r); }},
+            {"RuntimeInvisibleParameterAnnotations", [](u2 ni, u4 l, ConstantsPool* cp, BytesReader& r) -> AttributeInfo* { return new AttributeRuntimeInvisibleParameterAnnotations(ni,l,cp,r); }},
+            {"AnnotationDefault",                 [](u2 ni, u4 l, ConstantsPool* cp, BytesReader& r) -> AttributeInfo* { return new AttributeAnnotationDefault(ni,l,cp,r); }},
+            {"StackMapTable",                     [](u2 ni, u4 l, ConstantsPool* cp, BytesReader& r) -> AttributeInfo* { return new AttributeStackMapTable(ni,l,cp,r); }},
+            {"BootstrapMethods",                  [](u2 ni, u4 l, ConstantsPool* cp, BytesReader& r) -> AttributeInfo* { return new AttributeBootstrapMethods(ni,l,cp,r); }},
+            {"RuntimeVisibleTypeAnnotations",     [](u2 ni, u4 l, ConstantsPool* cp, BytesReader& r) -> AttributeInfo* { return new AttributeRuntimeVisibleTypeAnnotations(ni,l,cp,r); }},
+            {"RuntimeInvisibleTypeAnnotations",   [](u2 ni, u4 l, ConstantsPool* cp, BytesReader& r) -> AttributeInfo* { return new AttributeRuntimeInvisibleTypeAnnotations(ni,l,cp,r); }},
+            {"MethodParameters",                  [](u2 ni, u4 l, ConstantsPool* cp, BytesReader& r) -> AttributeInfo* { return new AttributeMethodParameters(ni,l,cp,r); }},
+        };
+        return factories;
+    }
+
     AttributeInfo *AttributeInfo::from(BytesReader &reader, ConstantsPool* constantsPool) {
         u2 nameIndex = reader.readU2();
         u4 length = reader.readU4();
         std::string attributeName = constantsPool->utf8(nameIndex);
 
-        //todo::
-//        std::cout << attributeName << std::endl;
-
-        if(attributeName == "ConstantValue")                              return new AttributeConstantValue(nameIndex,length,constantsPool,reader);
-        else if(attributeName == "Code")                                  return new AttributeCode(nameIndex,length,constantsPool,reader);
-        else if(attributeName == "Exceptions")                            return new AttributeExceptions(nameIndex,length,constantsPool,reader);
-        else if(attributeName == "SourceFile")                            return new AttributeSourceFile(nameIndex,length,constantsPool,reader);
-        else if(attributeName == "LineNumberTable")                       return new AttributeLineNumberTable(nameIndex,length,constantsPool,reader);
-        else if(attributeName == "LocalVariableTable")                    return new AttributeLocalVariableTable(nameIndex,length,constantsPool,reader);
-        else if(attributeName == "InnerClasses")                          return new AttributeInnerClasses(nameIndex,length,constantsPool,reader);
-        else if(attributeName == "Synthetic")                             return new AttributeSynthetic(nameIndex,length,constantsPool,reader);
-        else if(attributeName == "Deprecated")                            return new AttributeDeprecated(nameIndex,length,constantsPool,reader);
-        else if(attributeName == "EnclosingMethod")                       return new AttributeEnclosingMethod(nameIndex,length,constantsPool,reader);
-        else if(attributeName == "Signature")                             return new AttributeSignature(nameIndex,length,constantsPool,reader);
-        else if(attributeName == "SourceDebugExtension")                  return new AttributeSourceDebugExtension(nameIndex,length,constantsPool,reader);
-        else if(attributeName == "LocalVariableTypeTable")                return new AttributeLocalVariableTypeTable(nameIndex,length,constantsPool,reader);
-        else if(attributeName == "RuntimeVisibleAnnotations")             return new AttributeRuntimeVisibleAnnotations(nameIndex,length,constantsPool,reader);
-        else if(attributeName == "RuntimeInvisibleAnnotations")           return new AttributeRuntimeInvisibleAnnotations(nameIndex,length,constantsPool,reader);
-        else if(attributeName == "RuntimeVisibleParameterAnnotations")    return new AttributeRuntimeVisibleParameterAnnotations(nameIndex,length,constantsPool,reader);
-        else if(attributeName == "RuntimeInvisibleParameterAnnotations")  return new AttributeRuntimeInvisibleParameterAnnotations(nameIndex,length,constantsPool,reader);
-        else if(attributeName == "AnnotationDefault")                     return new AttributeAnnotationDefault(nameIndex,length,constantsPool,reader);
-        else if(attributeName == "StackMapTable")                         return new AttributeStackMapTable(nameIndex,length,constantsPool,reader);
-        else if(attributeName == "BootstrapMethods")                      return new AttributeBootstrapMethods(nameIndex,length,constantsPool,reader);
-        else if(attributeName == "RuntimeVisibleTypeAnnotations")         return new AttributeRuntimeVisibleTypeAnnotations(nameIndex,length,constantsPool,reader);
-        else if(attributeName == "RuntimeInvisibleTypeAnnotations")       return new AttributeRuntimeInvisibleTypeAnnotations(nameIndex,length,constantsPool,reader);
-        else if(attributeName == "MethodParameters")                      return new AttributeMethodParameters(nameIndex,length,constantsPool,reader);
-        else {
-            exception::panic("no such attribute: " + attributeName);
+        const auto& factories = attributeFactories();
+        auto it = factories.find(attributeName);
+        if (it != factories.end()) {
+            return it->second(nameIndex, length, constantsPool, reader);
         }
+        exception::panic("no such attribute: " + attributeName);
         return nullptr;
     }
 

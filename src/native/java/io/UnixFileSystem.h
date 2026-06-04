@@ -9,8 +9,6 @@
 #include "../../../runtime/thread/Frame.h"
 
 namespace native::java::io::UnixFileSystem {
-    void doRegistration();
-
     void canonicalize0(runtime::Frame *frame);
     void getBooleanAttributes0(runtime::Frame* frame);
 }

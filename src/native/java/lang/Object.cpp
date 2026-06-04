@@ -9,13 +9,6 @@
 
 namespace native::java::lang::Object {
 
-    void doRegistration() {
-        setRegister("java/lang/Object", "getClass", "()Ljava/lang/Class;", native::java::lang::Object::getClass);
-        setRegister("java/lang/Object", "hashCode", "()I", native::java::lang::Object::hashCode);
-        setRegister("java/lang/Object", "clone", "()Ljava/lang/Object;", native::java::lang::Object::clone);
-        setRegister("java/lang/Object", "notifyAll", "()V", native::java::lang::Object::notifyAll);
-    }
-
     // public final native Class<?> getClass();
     // ()Ljava/lang/Class;
     void getClass(runtime::Frame *frame) {

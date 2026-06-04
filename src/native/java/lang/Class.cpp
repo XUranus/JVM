@@ -54,25 +54,6 @@ namespace native::java::lang {
 
 
 
-    void Class::doRegistration() {
-        const std::string className = "java/lang/Class";
-        setRegister(className, "getPrimitiveClass", "(Ljava/lang/String;)Ljava/lang/Class;", getPrimitiveClass);
-        setRegister(className, "getName0", "()Ljava/lang/String;", getName0);
-        setRegister(className, "desiredAssertionStatus0", "(Ljava/lang/Class;)Z", desiredAssertionStatus0);
-        setRegister(className, "isInterface", "()Z", isInterface);
-        setRegister(className, "isPrimitive", "()Z", isPrimitive);
-        setRegister(className, "forName0", "(Ljava/lang/String;ZLjava/lang/ClassLoader;Ljava/lang/Class;)Ljava/lang/Class;", forName0);
-        setRegister(className, "getModifiers", "()I", getModifiers);
-        setRegister(className, "getSuperclass", "()Ljava/lang/Class;", getSuperclass);
-        setRegister(className, "getInterfaces0", "()[Ljava/lang/Class;", getInterfaces0);
-        setRegister(className, "isArray", "()Z", isArray);
-        setRegister(className, "getDeclaredMethods0", "(Z)[Ljava/lang/reflect/Method;", getDeclaredMethods0);
-        setRegister(className, "getDeclaredConstructors0", "(Z)[Ljava/lang/reflect/Constructor;", getDeclaredConstructors0);
-        setRegister(className, "getDeclaredFields0", "(Z)[Ljava/lang/reflect/Field;", getDeclaredFields0);
-        setRegister(className, "getComponentType", "()Ljava/lang/Class;", getComponentType);
-        setRegister(className, "isAssignableFrom", "(Ljava/lang/Class;)Z", isAssignableFrom);
-    }
-
     heap::Object* toClassArr(heap::ClassLoader* loader, const std::vector<heap::Class*>& classes) {
         heap::Class* classArrayClass = loader->loadClass("java/lang/Class")->arrayClass();
         heap::Object* classArray = classArrayClass->newArrayObject(classes.size());

@@ -7,10 +7,6 @@
 
 namespace native::sun::misc::URLClassPath {
 
-    void doRegistration() {
-        setRegister("sun/misc/URLClassPath", "getLookupCacheURLs", "(Ljava/lang/ClassLoader;)[Ljava/net/URL;", getLookupCacheURLs);
-    }
-
     // private static native URL[] getLookupCacheURLs(ClassLoader var0);
     // (Ljava/lang/ClassLoader;)[Ljava/net/URL
     void getLookupCacheURLs(runtime::Frame* frame) {

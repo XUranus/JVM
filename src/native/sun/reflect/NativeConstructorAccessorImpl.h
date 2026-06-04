@@ -8,8 +8,6 @@
 #include "../../../runtime/thread/Frame.h"
 
 namespace native::sun::reflect::NativeConstructorAccessorImpl {
-    void doRegistration();
-
     void newInstance0(runtime::Frame *frame);
 }
 

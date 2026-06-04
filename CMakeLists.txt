@@ -54,28 +54,16 @@ add_library(xjava_lib STATIC
     src/instruction/InstructionReader.h
     src/instruction/instruction.cpp
     src/instruction/instruction.h
-    src/instruction/comparisons.cpp
-    src/instruction/comparisons.h
-    src/instruction/constants.cpp
-    src/instruction/constants.h
-    src/instruction/control.cpp
-    src/instruction/control.h
-    src/instruction/conversions.cpp
-    src/instruction/conversions.h
+    src/instruction/instructions.h
+    src/instruction/instructions.cpp
     src/instruction/extended.cpp
     src/instruction/extended.h
-    src/instruction/loads.cpp
-    src/instruction/loads.h
-    src/instruction/math.cpp
-    src/instruction/math.h
     src/instruction/references.cpp
     src/instruction/references.h
     src/instruction/reserved.cpp
     src/instruction/reserved.h
     src/instruction/stack.cpp
     src/instruction/stack.h
-    src/instruction/stores.cpp
-    src/instruction/stores.h
 
     src/runtime/heap/Class.cpp
     src/runtime/heap/Class.h

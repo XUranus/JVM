@@ -10,10 +10,6 @@
 
 namespace native::java::lang::Runtime {
 
-    void doRegistration() {
-        setRegister("java/lang/Runtime", "availableProcessors", "()I", availableProcessors);
-    }
-
     // public native int availableProcessors();
     // ()I
     void availableProcessors(runtime::Frame* frame) {

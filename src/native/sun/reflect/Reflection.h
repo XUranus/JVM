@@ -8,9 +8,6 @@
 #include "../../../runtime/thread/Frame.h"
 
 namespace native::sun::reflect::Reflection {
-
-    void doRegistration();
-
     void getCallerClass(runtime::Frame *frame);
     void getClassAccessFlags(runtime::Frame *frame);
 

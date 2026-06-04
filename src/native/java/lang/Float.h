@@ -8,8 +8,6 @@
 #include "../../../runtime/thread/Frame.h"
 
 namespace native::java::lang::Float {
-    void doRegistration();
-
     void floatToRawIntBits(runtime::Frame* frame);
     void intBitsToFloat(runtime::Frame* frame);
 };

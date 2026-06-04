@@ -9,25 +9,6 @@
 
 namespace native::sun::misc::Unsafe {
 
-    void doRegistration() {
-        const std::string klass = "sun/misc/Unsafe";
-        setRegister(klass, "arrayBaseOffset", "(Ljava/lang/Class;)I", arrayBaseOffset);
-        setRegister(klass, "arrayIndexScale", "(Ljava/lang/Class;)I", arrayIndexScale);
-        setRegister(klass, "addressSize", "()I", addressSize);
-        setRegister(klass, "objectFieldOffset", "(Ljava/lang/reflect/Field;)J", objectFieldOffset);
-        setRegister(klass, "compareAndSwapObject", "(Ljava/lang/Object;JLjava/lang/Object;Ljava/lang/Object;)Z", compareAndSwapObject);
-        setRegister(klass, "getIntVolatile", "(Ljava/lang/Object;J)I", getInt);
-        setRegister(klass, "compareAndSwapInt", "(Ljava/lang/Object;JII)Z", compareAndSwapInt);
-        setRegister(klass, "getObjectVolatile", "(Ljava/lang/Object;J)Ljava/lang/Object;", getObject);
-        setRegister(klass, "compareAndSwapLong", "(Ljava/lang/Object;JJJ)Z", compareAndSwapLong);
-        // memory allocation
-        setRegister(klass, "allocateMemory", "(J)J", allocateMemory);
-        setRegister(klass, "reallocateMemory", "(JJ)J", reallocateMemory);
-        setRegister(klass, "freeMemory", "(J)V", freeMemory);
-        setRegister(klass, "getByte", "(J)B", getByte);
-        setRegister(klass, "putLong", "(JJ)V", putLong);
-    }
-
     // public native int arrayBaseOffset(Class<?> type);
     // (Ljava/lang/Class;)I
     void arrayBaseOffset(runtime::Frame *frame) {

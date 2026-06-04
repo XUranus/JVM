@@ -8,8 +8,6 @@
 #include "../../../runtime/thread/Frame.h"
 
 namespace native::java::security::AccessController {
-    void doRegistration();
-
     void doPrivileged(runtime::Frame *frame);
     void getStackAccessControlContext(runtime::Frame *frame);
 }

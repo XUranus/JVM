@@ -13,10 +13,6 @@ namespace native::java::lang {
 
     std::map<heap::Object *, std::vector<Throwable::StackTraceElement>> Throwable::exceptionStackTraceMap;
 
-    void Throwable::deRegistration() {
-        setRegister("java/lang/Throwable", "fillInStackTrace", "(I)Ljava/lang/Throwable;", native::java::lang::Throwable::fillInStackTrace);
-    }
-
     // depth of Exception class inheritance
     int distanceToObject(heap::Class* klass)  {
         int distance = 0;

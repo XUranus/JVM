@@ -14,12 +14,6 @@
 
 namespace native::java::security::AccessController {
 
-    void doRegistration() {
-        setRegister("java/security/AccessController", "doPrivileged", "(Ljava/security/PrivilegedAction;)Ljava/lang/Object;", doPrivileged);
-        setRegister("java/security/AccessController", "doPrivileged", "(Ljava/security/PrivilegedExceptionAction;)Ljava/lang/Object;", doPrivileged);
-        setRegister("java/security/AccessController", "getStackAccessControlContext", "()Ljava/security/AccessControlContext;", getStackAccessControlContext);
-    }
-
     // @CallerSensitive
     // public static native <T> T
     //     doPrivileged(PrivilegedExceptionAction<T> action)

@@ -9,8 +9,6 @@
 #include "../../../runtime/thread/Frame.h"
 
 namespace native::sun::misc::URLClassPath {
-    void doRegistration();
-
     void getLookupCacheURLs(runtime::Frame* frame);
 };
 

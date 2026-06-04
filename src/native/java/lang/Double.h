@@ -8,8 +8,6 @@
 #include "../../../runtime/thread/Frame.h"
 
 namespace native::java::lang::Double  {
-    void doRegistration();
-
     void doubleToRawLongBits(runtime::Frame* frame);
     void longBitsToDouble(runtime::Frame* frame);
 };

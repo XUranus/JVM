@@ -10,11 +10,6 @@
 
 namespace native::java::lang::Double {
 
-    void doRegistration() {
-        setRegister("java/lang/Double", "doubleToRawLongBits", "(D)J", native::java::lang::Double::doubleToRawLongBits);
-        setRegister("java/lang/Double", "longBitsToDouble", "(J)D", native::java::lang::Double::longBitsToDouble);
-    }
-
     // public static native long doubleToRawLongBits(double value);
     // (D)J
     void doubleToRawLongBits(runtime::Frame *frame) {

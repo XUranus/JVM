@@ -9,8 +9,6 @@
 #include "../../../runtime/thread/Frame.h"
 
 namespace native::java::io::FileDescriptor {
-    void doRegistration();
-
     void set(runtime::Frame *frame);
 }
 
